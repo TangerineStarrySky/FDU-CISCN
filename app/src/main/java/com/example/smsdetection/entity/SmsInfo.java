@@ -8,6 +8,8 @@ public class SmsInfo {
     public String content;
     public int type;
 
+    public boolean isSelected;
+
     // 账单类型，0 收入，1 支出
     public static final int SMS_TYPE_COMMON = 0;
     public static final int SMS_TYPE_DECEIVE = 1;

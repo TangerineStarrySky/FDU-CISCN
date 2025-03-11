@@ -75,7 +75,7 @@ public class SmsDetailActivity extends AppCompatActivity implements View.OnClick
         }else if (vid == R.id.tv_history){
             Intent intent = new Intent();
             intent.setClass(SmsDetailActivity.this, HistoryActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
         }else if(vid == R.id.detail_btn){
             String detail = null;

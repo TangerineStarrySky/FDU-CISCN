@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -30,6 +31,7 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
     private SmsAdapter mSmsAdapter;
     private ListView lv_sms;
     private TextView tv_total_num;
+    private CheckBox checkBox_select_all;
 
 //    private AppViewModel.ChatState chatState;
 
@@ -55,6 +57,13 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
         lv_sms = findViewById(R.id.lv_sms);
         tv_total_num = findViewById(R.id.tv_total_num);
 
+        // Initialize the "Select All" CheckBox
+        checkBox_select_all = findViewById(R.id.select_all);
+        checkBox_select_all.setOnClickListener(v -> {
+            boolean isChecked = ((CheckBox) v).isChecked();
+            toggleAllItemsSelection(isChecked); // Toggle all items when clicked
+        });
+
 //        Calendar calendar = Calendar.getInstance();
 //        SmsInfo smsInfo = new SmsInfo();
 //        smsInfo.sender = "我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我";
@@ -78,26 +87,84 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
 
     }
 
+    /**
+     * Toggle selection for all items.
+     *
+     * @param isChecked If true, select all items; if false, deselect all.
+     */
+    private void toggleAllItemsSelection(boolean isChecked) {
+        if (mSmsAdapter == null || mSmsList.isEmpty()) return;
+
+        // Update all items' selection state
+        for (SmsInfo info : mSmsList) {
+            info.isSelected = isChecked;
+        }
+
+        // Refresh the adapter and update the "Select All" CheckBox
+        mSmsAdapter.notifyDataSetChanged();
+        checkBox_select_all.setChecked(isChecked); // Ensure consistency
+    }
+
+
     @Override
     public void onClick(View view) {
         int vid = view.getId();
         if(vid == R.id.ic_back){
             finish();
         } else if (vid == R.id.btn_clear) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(HistoryActivity.this);
-            builder.setMessage("确定要清空所有信息记录？");
-            builder.setPositiveButton("是", (dialog, which) -> {
-                mDBHelper.deleteAllSmsInfo();
-                mSmsList.clear();
-                refreshTotalNum();
-                mSmsAdapter.notifyDataSetChanged();
-                ToastUtil.show(this, "历史信息已清空");
-            });
-            builder.setNegativeButton("否", null);
-            builder.create().show();
+            // 清空按钮
+            if (mSmsAdapter.getEditMode()) {
+                // 如果处于编辑模式，删除选中的项
+                deleteSelectedItems();
+            } else {
+                // 如果不在编辑模式，弹出确认对话框清空所有记录
+                showClearAllDialog();
+            }
+        }
+    }
+
+    /**
+     * 显示清空所有记录的确认对话框
+     */
+    private void showClearAllDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(HistoryActivity.this);
+        builder.setMessage("确定要清空所有信息记录？");
+        builder.setPositiveButton("是", (dialog, which) -> {
+            mDBHelper.deleteAllSmsInfo(); // 清空数据库
+            mSmsList.clear(); // 清空列表
+            refreshTotalNum(); // 刷新总记录数
+            mSmsAdapter.notifyDataSetChanged(); // 刷新适配器
+            ToastUtil.show(this, "历史信息已清空");
+        });
+        builder.setNegativeButton("否", null);
+        builder.create().show();
+    }
+
+    /**
+     * 删除选中的项
+     */
+    private void deleteSelectedItems() {
+        List<SmsInfo> selectedItems = mSmsAdapter.getSelectedItems();
+        if (selectedItems.isEmpty()) {
+            ToastUtil.show(this, "请先选择要删除的项！");
+            return;
         }
 
+        // 删除选中的项
+        for (SmsInfo info : selectedItems) {
+            mDBHelper.deleteSmsInfoById(info.id); // 从数据库删除
+            mSmsList.remove(info); // 从列表删除
+        }
+
+        mSmsAdapter.notifyDataSetChanged(); // 刷新适配器
+        refreshTotalNum(); // 刷新总记录数
+        ToastUtil.show(this, "已删除选中的信息！");
+
+        // 退出编辑模式
+        mSmsAdapter.setEditMode(false);
+        checkBox_select_all.setVisibility(View.GONE);
     }
+
 
     @Override
     protected void onResume() {
@@ -134,21 +201,23 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l) {
-        SmsInfo info = mSmsList.get(position);
-        AlertDialog.Builder builder = new AlertDialog.Builder(HistoryActivity.this);
-        builder.setMessage("是否删除此条信息？");
-        builder.setPositiveButton("是", (dialog, which) -> {
-            // 删除该商品
-            mDBHelper.deleteSmsInfoById(info.id);
-            mSmsList.remove(position);
-            // 通知适配器发生了数据变化
-            mSmsAdapter.notifyDataSetChanged();
-            // 刷新总数
-            refreshTotalNum();
-            ToastUtil.show(this, "已删除该信息！");
-        });
-        builder.setNegativeButton("否", null);
-        builder.create().show();
+        mSmsAdapter.setEditMode(true);
+        checkBox_select_all.setVisibility(View.VISIBLE);
+//        SmsInfo info = mSmsList.get(position);
+//        AlertDialog.Builder builder = new AlertDialog.Builder(HistoryActivity.this);
+//        builder.setMessage("是否删除此条信息？");
+//        builder.setPositiveButton("是", (dialog, which) -> {
+//            // 删除该商品
+//            mDBHelper.deleteSmsInfoById(info.id);
+//            mSmsList.remove(position);
+//            // 通知适配器发生了数据变化
+//            mSmsAdapter.notifyDataSetChanged();
+//            // 刷新总数
+//            refreshTotalNum();
+//            ToastUtil.show(this, "已删除该信息！");
+//        });
+//        builder.setNegativeButton("否", null);
+//        builder.create().show();
         return true;
     }
 }

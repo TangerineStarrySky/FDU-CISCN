@@ -298,17 +298,17 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
             Intent intent = new Intent();
             intent.setClass(MainActivity.this, HistoryActivity.class);
 //            intent.putExtra("chat_state", appViewModel.getChatState());
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
         }else if (vid == R.id.tv_learning){
             Intent intent = new Intent();
             intent.setClass(MainActivity.this, LearningActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
         }else if (vid == R.id.tv_feedback){
             Intent intent = new Intent();
             intent.setClass(MainActivity.this, FeedbackActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
         }else if(vid == R.id.btn_detect){
             Utils.hideOneInputMethod(MainActivity.this, view);

@@ -30,7 +30,7 @@ public class ChatClient {
         GenerationParam param = GenerationParam.builder()
                 // 若没有配置环境变量，请用百炼API Key将下行替换为：.apiKey("sk-xxx")
 //                .apiKey(System.getenv("DASHSCOPE_API_KEY"))
-                .apiKey("sk-965fb4ea3c864b048f26b4f5a15851a3")
+                .apiKey("sk-2cb2f30af328413e956ceeeb3fa5645a")
                 .model(MODELS[model_id])
                 .messages(Arrays.asList(systemMsg, userMsg))
                 .resultFormat(GenerationParam.ResultFormat.MESSAGE)
