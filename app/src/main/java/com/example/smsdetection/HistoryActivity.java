@@ -110,7 +110,10 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
     public void onClick(View view) {
         int vid = view.getId();
         if(vid == R.id.ic_back){
-            finish();
+            if(mSmsAdapter.getEditMode()) {
+                mSmsAdapter.setEditMode(false);
+                checkBox_select_all.setVisibility(View.GONE);
+            } else finish();
         } else if (vid == R.id.btn_clear) {
             // 清空按钮
             if (mSmsAdapter.getEditMode()) {
