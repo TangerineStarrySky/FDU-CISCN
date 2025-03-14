@@ -289,6 +289,11 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
                 status = true;
                 status_btn.setText(R.string.close_analysis);
                 ToastUtil.show(this, "鹰眼智能识别已开启！");
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, DetectionActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+
             } else if (status_btn.getText().toString().equals(getString(R.string.close_analysis))){
                 status = false;
                 status_btn.setText(R.string.open_analysis);
