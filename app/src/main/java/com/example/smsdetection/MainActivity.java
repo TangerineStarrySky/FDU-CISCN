@@ -290,7 +290,7 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
                 status_btn.setText(R.string.close_analysis);
                 ToastUtil.show(this, "鹰眼智能识别已开启！");
                 Intent intent = new Intent();
-                intent.setClass(MainActivity.this, DetectionActivity.class);
+                intent.setClass(MainActivity.this, DetectionSelectionActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
 
@@ -308,6 +308,7 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
         }else if (vid == R.id.tv_learning){
             Intent intent = new Intent();
             intent.setClass(MainActivity.this, LearningActivity.class);
+//            intent.setClass(MainActivity.this, VideoActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
         }else if (vid == R.id.tv_feedback){

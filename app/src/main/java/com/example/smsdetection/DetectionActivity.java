@@ -57,7 +57,7 @@ public class DetectionActivity extends AppCompatActivity implements AdapterView.
         progressBar = findViewById(R.id.progressBar);
         progressText = findViewById(R.id.progressText);
         lv_sms = findViewById(R.id.lv_sms);
-        checkBox_select_all = findViewById(R.id.select_all);
+//        checkBox_select_all = findViewById(R.id.select_all);
 
 
         // 初始化 mSmsList
@@ -74,7 +74,7 @@ public class DetectionActivity extends AppCompatActivity implements AdapterView.
     }
 
     private void loadSmsMessages() {
-        List<SmsInfo> smsList = readSmsMessages();
+        ArrayList<SmsInfo> smsList = getIntent().getParcelableArrayListExtra("mSmsList");
         int totalMessages = smsList.size();
         // 逐条展示短信
         for (int i = 0; i < totalMessages; i++) {
@@ -100,91 +100,91 @@ public class DetectionActivity extends AppCompatActivity implements AdapterView.
 
     }
 
-    private List<SmsInfo> readSmsMessages() {
-        Uri uri = Uri.parse("content://sms");
-        List<SmsInfo> smsList = new ArrayList<>();
-
-        // 检查 uri 是否为空
-        if (uri == null) {
-            return smsList; // 返回空列表，而不是 null
-        }
-
-//        // 通过内容解析器获取符合条件的结果集游标
-//        Context context = getApplicationContext();
-//        Cursor cursor = context.getContentResolver().query(
-//                uri,
-//                new String[]{"address", "body", "date"},
-//                null,
-//                null,
-//                "date DESC"
-//        );
-
-//        Cursor cursor = getContentResolver().query(
-//                uri,
-//                new String[]{"address", "body", "date"},
-//                null,
-//                null,
-//                "date ASC" // 按时间从久远到最新排序
-//        );
+//    private List<SmsInfo> readSmsMessages() {
+//        Uri uri = Uri.parse("content://sms");
+//        List<SmsInfo> smsList = new ArrayList<>();
 //
-//        // 检查 cursor 是否为空
-//        if (cursor == null) {
+//        // 检查 uri 是否为空
+//        if (uri == null) {
 //            return smsList; // 返回空列表，而不是 null
 //        }
 //
-//        // 遍历 cursor
-//        while (cursor.moveToNext()) {
-//            // 短信的发送号码
-//            String sender = cursor.getString(cursor.getColumnIndexOrThrow("address"));
-//            // 短信内容
-//            String content = cursor.getString(cursor.getColumnIndexOrThrow("body"));
-//            // 短信日期
-//            long date = cursor.getLong(cursor.getColumnIndexOrThrow("date"));
+////        // 通过内容解析器获取符合条件的结果集游标
+////        Context context = getApplicationContext();
+////        Cursor cursor = context.getContentResolver().query(
+////                uri,
+////                new String[]{"address", "body", "date"},
+////                null,
+////                null,
+////                "date DESC"
+////        );
 //
-//            // 打印日志
-//            Log.d("DEBUG", String.format("sender:%s, content:%s, date:%d", sender, content, date));
+////        Cursor cursor = getContentResolver().query(
+////                uri,
+////                new String[]{"address", "body", "date"},
+////                null,
+////                null,
+////                "date ASC" // 按时间从久远到最新排序
+////        );
+////
+////        // 检查 cursor 是否为空
+////        if (cursor == null) {
+////            return smsList; // 返回空列表，而不是 null
+////        }
+////
+////        // 遍历 cursor
+////        while (cursor.moveToNext()) {
+////            // 短信的发送号码
+////            String sender = cursor.getString(cursor.getColumnIndexOrThrow("address"));
+////            // 短信内容
+////            String content = cursor.getString(cursor.getColumnIndexOrThrow("body"));
+////            // 短信日期
+////            long date = cursor.getLong(cursor.getColumnIndexOrThrow("date"));
+////
+////            // 打印日志
+////            Log.d("DEBUG", String.format("sender:%s, content:%s, date:%d", sender, content, date));
+////
+////            // 创建 SmsInfo 对象
+////            SmsInfo info = new SmsInfo();
+//////            info.datetime = Utils.getDate(Calendar.getInstance()) + "=" + Utils.getNowTime();
+////            info.datetime = Utils.formatDate(date) + "=" + Utils.formatTime(date);
+////            info.sender = sender;
+////            info.content = content;
+////            info.type = SmsInfo.SMS_TYPE_COMMON;
+////
+////            // 将 SmsInfo 对象添加到列表
+////            smsList.add(info);
+////        }
+////
+////        // 关闭 cursor
+////        cursor.close();
 //
-//            // 创建 SmsInfo 对象
+//        // 随机数据测试代码
+//        String[] senders = {"10086", "+1234567890", "Bank Alert", "Mom", "Spam Caller"};
+//        String[] messages = {
+//                "Your bill is due on the 25th.",
+//                "Hey, let's catch up this weekend!",
+//                "Transaction Alert: $500 deducted.",
+//                "Dinner is ready! Come home soon.",
+//                "You won a lottery! Click here to claim your prize."
+//        };
+//
+//        Random random = new Random();
+//
+//        for (int i = 0; i < 10; i++) { // 生成10条测试短信
 //            SmsInfo info = new SmsInfo();
-////            info.datetime = Utils.getDate(Calendar.getInstance()) + "=" + Utils.getNowTime();
-//            info.datetime = Utils.formatDate(date) + "=" + Utils.formatTime(date);
-//            info.sender = sender;
-//            info.content = content;
+//            long randomTimestamp = System.currentTimeMillis() - random.nextInt(1000000000);
+//
+//            info.sender = senders[random.nextInt(senders.length)];
+//            info.content = messages[random.nextInt(messages.length)];
+//            info.datetime = Utils.formatDate(randomTimestamp) + "=" + Utils.formatTime(randomTimestamp);
 //            info.type = SmsInfo.SMS_TYPE_COMMON;
 //
-//            // 将 SmsInfo 对象添加到列表
 //            smsList.add(info);
 //        }
 //
-//        // 关闭 cursor
-//        cursor.close();
-
-        // 随机数据测试代码
-        String[] senders = {"10086", "+1234567890", "Bank Alert", "Mom", "Spam Caller"};
-        String[] messages = {
-                "Your bill is due on the 25th.",
-                "Hey, let's catch up this weekend!",
-                "Transaction Alert: $500 deducted.",
-                "Dinner is ready! Come home soon.",
-                "You won a lottery! Click here to claim your prize."
-        };
-
-        Random random = new Random();
-
-        for (int i = 0; i < 10; i++) { // 生成10条测试短信
-            SmsInfo info = new SmsInfo();
-            long randomTimestamp = System.currentTimeMillis() - random.nextInt(1000000000);
-
-            info.sender = senders[random.nextInt(senders.length)];
-            info.content = messages[random.nextInt(messages.length)];
-            info.datetime = Utils.formatDate(randomTimestamp) + "=" + Utils.formatTime(randomTimestamp);
-            info.type = SmsInfo.SMS_TYPE_COMMON;
-
-            smsList.add(info);
-        }
-
-        return smsList;
-    }
+//        return smsList;
+//    }
 
     private void onLoadingComplete() {
         // 1. 将 ProgressBar 的背景设置为绿色圆圈

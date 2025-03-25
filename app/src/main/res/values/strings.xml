@@ -34,4 +34,5 @@
 6.反诈预警短信系统\n
 7.国家反诈中心官方政务号\n
     </string>
+    <string name="title_activity_detection_selection">DetectionSelectionActivity</string>
 </resources>
