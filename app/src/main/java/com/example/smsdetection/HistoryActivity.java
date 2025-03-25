@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -32,6 +33,7 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
     private ListView lv_sms;
     private TextView tv_total_num;
     private CheckBox checkBox_select_all;
+    private LinearLayout long_click_interface;
 
 //    private AppViewModel.ChatState chatState;
 
@@ -56,6 +58,7 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
 
         lv_sms = findViewById(R.id.lv_sms);
         tv_total_num = findViewById(R.id.tv_total_num);
+        long_click_interface = findViewById(R.id.long_click_interface);
 
         // Initialize the "Select All" CheckBox
         checkBox_select_all = findViewById(R.id.select_all);
@@ -112,7 +115,8 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
         if(vid == R.id.ic_back){
             if(mSmsAdapter.getEditMode()) {
                 mSmsAdapter.setEditMode(false);
-                checkBox_select_all.setVisibility(View.GONE);
+                long_click_interface.setVisibility(View.GONE);
+//                checkBox_select_all.setVisibility(View.GONE);
             } else finish();
         } else if (vid == R.id.btn_clear) {
             // 清空按钮
@@ -165,7 +169,8 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
 
         // 退出编辑模式
         mSmsAdapter.setEditMode(false);
-        checkBox_select_all.setVisibility(View.GONE);
+//        checkBox_select_all.setVisibility(View.GONE);
+        long_click_interface.setVisibility(View.GONE);
     }
 
 
@@ -205,7 +210,8 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l) {
         mSmsAdapter.setEditMode(true);
-        checkBox_select_all.setVisibility(View.VISIBLE);
+        long_click_interface.setVisibility(View.VISIBLE);
+//        checkBox_select_all.setVisibility(View.VISIBLE);
 //        SmsInfo info = mSmsList.get(position);
 //        AlertDialog.Builder builder = new AlertDialog.Builder(HistoryActivity.this);
 //        builder.setMessage("是否删除此条信息？");

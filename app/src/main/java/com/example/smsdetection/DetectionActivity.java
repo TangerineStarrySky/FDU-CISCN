@@ -2,7 +2,6 @@ package com.example.smsdetection;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -66,6 +65,8 @@ public class DetectionActivity extends AppCompatActivity implements AdapterView.
         mSmsAdapter = new SmsAdapter(this, mSmsList);
         lv_sms.setAdapter(mSmsAdapter);
 
+        lv_sms.setOnItemClickListener(this);
+        lv_sms.setOnItemLongClickListener(this);
 
         // 启动短信读取任务
         new Thread(this::loadSmsMessages).start();
@@ -170,7 +171,7 @@ public class DetectionActivity extends AppCompatActivity implements AdapterView.
 
         Random random = new Random();
 
-        for (int i = 0; i < 100; i++) { // 生成10条测试短信
+        for (int i = 0; i < 10; i++) { // 生成10条测试短信
             SmsInfo info = new SmsInfo();
             long randomTimestamp = System.currentTimeMillis() - random.nextInt(1000000000);
 
