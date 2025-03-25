@@ -2,9 +2,13 @@ package com.example.smsdetection;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -34,6 +38,7 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
     private TextView tv_total_num;
     private CheckBox checkBox_select_all;
     private LinearLayout long_click_interface;
+    private EditText search_box;
 
 //    private AppViewModel.ChatState chatState;
 
@@ -59,6 +64,47 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
         lv_sms = findViewById(R.id.lv_sms);
         tv_total_num = findViewById(R.id.tv_total_num);
         long_click_interface = findViewById(R.id.long_click_interface);
+
+        search_box = findViewById(R.id.search_box);
+        search_box.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String query = editable.toString().trim();
+                if (query.isEmpty()) {
+                    List<SmsInfo> searchResults = mDBHelper.queryAllSmsInfo(); // 查询所有短信
+                    mSmsList.clear();
+                    mSmsList.addAll(searchResults);
+                    mSmsAdapter.notifyDataSetChanged(); // 刷新适配器
+                    refreshTotalNum(); // 刷新记录总数
+                } else {
+
+                    // 异步查询数据库
+                    new Thread(() -> {
+                        List<SmsInfo> searchResults = mDBHelper.querySmsInfoBySearch(query);
+                        runOnUiThread(() -> {
+                            if (searchResults != null) {
+                                mSmsList.clear();
+                                mSmsList.addAll(searchResults);
+                                mSmsAdapter.notifyDataSetChanged(); // 刷新适配器
+                                refreshTotalNum(); // 刷新记录总数
+                            } else {
+                                Log.e("HistoryActivity", "No results found or query error");
+                            }
+                        });
+                    }).start();
+                }
+            }
+        });
 
         // Initialize the "Select All" CheckBox
         checkBox_select_all = findViewById(R.id.select_all);
@@ -116,7 +162,6 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
             if(mSmsAdapter.getEditMode()) {
                 mSmsAdapter.setEditMode(false);
                 long_click_interface.setVisibility(View.GONE);
-//                checkBox_select_all.setVisibility(View.GONE);
             } else finish();
         } else if (vid == R.id.btn_clear) {
             // 清空按钮
@@ -169,7 +214,6 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
 
         // 退出编辑模式
         mSmsAdapter.setEditMode(false);
-//        checkBox_select_all.setVisibility(View.GONE);
         long_click_interface.setVisibility(View.GONE);
     }
 

@@ -107,6 +107,34 @@ public class SmsDBHelper extends SQLiteOpenHelper {
         return list;
     }
 
+    public List<SmsInfo> querySmsInfoBySearch(String query) {
+        List<SmsInfo> list = new ArrayList<>();
+        // 在查询时使用 LIKE 语句进行模糊匹配，查询内容和发送者
+        String selection = "content LIKE ? OR sender LIKE ?";
+        String[] selectionArgs = new String[] { "%" + query + "%", "%" + query + "%" };
+
+        // 查询时返回所有需要的字段：id, datetime, sender, content, type
+        String[] columns = { "_id", "datetime", "sender", "content", "type" };
+
+        // 执行查询操作
+        Cursor cursor = mRDB.query(TABLE_SMS_INFO, columns, selection, selectionArgs, null, null, null);
+
+        // 遍历查询结果并添加到列表中
+        while (cursor.moveToNext()) {
+            SmsInfo info = new SmsInfo();
+            info.id = cursor.getInt(0);        // 获取 id 字段
+            info.datetime = cursor.getString(1); // 获取 datetime 字段
+            info.sender = cursor.getString(2);  // 获取 sender 字段
+            info.content = cursor.getString(3); // 获取 content 字段
+            info.type = cursor.getInt(4);      // 获取 type 字段
+            list.add(info);
+        }
+
+        cursor.close(); // 记得关闭Cursor
+        return list;
+    }
+
+
     public SmsInfo querySmsInfoById(int sms_id){
         SmsInfo info = null;
         Cursor cursor = mRDB.query(TABLE_SMS_INFO, null, "_id=?", new String[]{String.valueOf(sms_id)}, null, null, null);
