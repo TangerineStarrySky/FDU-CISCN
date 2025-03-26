@@ -215,7 +215,7 @@ public class DetectionSelectionActivity extends ComponentActivity implements Vie
         for (int i = 0; i < 100; i++) { // 生成10条测试短信
             SmsInfo info = new SmsInfo();
             long randomTimestamp = System.currentTimeMillis() - random.nextInt(1000000000);
-
+            info.id = i;
             info.sender = senders[random.nextInt(senders.length)];
             info.content = messages[random.nextInt(messages.length)];
             info.datetime = Utils.formatDate(randomTimestamp) + "=" + Utils.formatTime(randomTimestamp);

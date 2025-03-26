@@ -84,11 +84,12 @@ public class SmsDBHelper extends SQLiteOpenHelper {
     // 保存一条订单记录
     public long save(SmsInfo sms) {
         ContentValues cv = new ContentValues();
+        if(sms.id != 0) cv.put("_id", sms.id);
         cv.put("datetime", sms.datetime);
         cv.put("sender", sms.sender);
         cv.put("content", sms.content);
         cv.put("type", sms.type);
-        return mWDB.insert(TABLE_SMS_INFO, null, cv);
+        return mWDB.insertWithOnConflict(TABLE_SMS_INFO, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
     }
 
     // 查询所有的信息列表
