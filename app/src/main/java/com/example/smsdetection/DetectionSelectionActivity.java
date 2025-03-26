@@ -9,8 +9,11 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -30,15 +33,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class DetectionSelectionActivity extends ComponentActivity implements View.OnClickListener{
+public class DetectionSelectionActivity extends ComponentActivity implements View.OnClickListener, AdapterView.OnItemClickListener,AdapterView.OnItemLongClickListener
+{
     private TextView title;
     private TextView history;
     private SmsDBHelper mDBHelper;
-    private ArrayList<SmsInfo> mSmsList;
+    private List<SmsInfo> mSmsList;
     private SmsAdapter mSmsAdapter;
     private ListView lv_sms;
     private EditText search_box;
     private Button startButton;
+    private LinearLayout long_click_interface;
+    private CheckBox checkBox_select_all;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +66,14 @@ public class DetectionSelectionActivity extends ComponentActivity implements Vie
 
         mDBHelper = SmsDBHelper.getInstance(this);
         findViewById(R.id.ic_back).setOnClickListener(this);
+
+        long_click_interface = findViewById(R.id.long_click_interface);
+
+        checkBox_select_all = findViewById(R.id.select_all);
+        checkBox_select_all.setOnClickListener(v -> {
+            boolean isChecked = ((CheckBox) v).isChecked();
+            toggleAllItemsSelection(isChecked); // Toggle all items when clicked
+        });
 
         lv_sms = findViewById(R.id.lv_sms);
         search_box = findViewById(R.id.search_box);
@@ -102,6 +116,19 @@ public class DetectionSelectionActivity extends ComponentActivity implements Vie
         });
     }
 
+    private void toggleAllItemsSelection(boolean isChecked) {
+        if (mSmsAdapter == null || mSmsList.isEmpty()) return;
+
+        // Update all items' selection state
+        for (SmsInfo info : mSmsList) {
+            info.isSelected = isChecked;
+        }
+
+        // Refresh the adapter and update the "Select All" CheckBox
+        mSmsAdapter.notifyDataSetChanged();
+        checkBox_select_all.setChecked(isChecked); // Ensure consistency
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -117,8 +144,8 @@ public class DetectionSelectionActivity extends ComponentActivity implements Vie
         mSmsAdapter = new SmsAdapter(this, mSmsList);
         lv_sms.setAdapter(mSmsAdapter);
         // 给列表项设置监听
-//        lv_sms.setOnItemClickListener(this);
-//        lv_sms.setOnItemLongClickListener(this);
+        lv_sms.setOnItemClickListener(this);
+        lv_sms.setOnItemLongClickListener(this);
         // 重新计算总数
     }
 
@@ -128,10 +155,15 @@ public class DetectionSelectionActivity extends ComponentActivity implements Vie
         if(vid == R.id.ic_back){
             finish();
         } else if (vid == R.id.startButton) {
+            if(mSmsAdapter.getEditMode()) {
+                mSmsList = mSmsAdapter.getSelectedItems();
+            }
+
             Intent intent = new Intent();
             intent.setClass(DetectionSelectionActivity.this, DetectionActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            intent.putParcelableArrayListExtra("mSmsList", mSmsList);
+            ArrayList<SmsInfo> smsArrayList = new ArrayList<>(mSmsList);
+            intent.putParcelableArrayListExtra("mSmsList", smsArrayList);
             startActivity(intent);
         }
     }
@@ -225,5 +257,21 @@ public class DetectionSelectionActivity extends ComponentActivity implements Vie
         }
 
         return smsList;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+
+        Intent intent = new Intent(DetectionSelectionActivity.this, SmsDetailActivity.class);
+        intent.putExtra("sms_id", mSmsList.get(position).id);
+//        intent.putExtra("chat_state", chatState);
+        startActivity(intent);
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l) {
+        mSmsAdapter.setEditMode(true);
+        long_click_interface.setVisibility(View.VISIBLE);
+        return true;
     }
 }

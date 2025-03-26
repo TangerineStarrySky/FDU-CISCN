@@ -7,8 +7,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.smsdetection.entity.SmsInfo;
+import com.example.smsdetection.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 
@@ -72,7 +74,8 @@ public class SmsDBHelper extends SQLiteOpenHelper {
                 " datetime VARCHAR NOT NULL," +
                 " sender VARCHAR NOT NULL," +
                 " content VARCHAR NOT NULL," +
-                " type INTEGER NOT NULL);";
+                " type INTEGER NOT NULL," +
+                " timestamp DATETIME DEFAULT CURRENT_TIMESTAMP);";
         db.execSQL(sql);
     }
 
@@ -95,7 +98,7 @@ public class SmsDBHelper extends SQLiteOpenHelper {
     // 查询所有的信息列表
     public List<SmsInfo> queryAllSmsInfo() {
         List<SmsInfo> list = new ArrayList<>();
-        Cursor cursor = mRDB.query(TABLE_SMS_INFO, null, null, null, null, null, null);
+        Cursor cursor = mRDB.query(TABLE_SMS_INFO, null, null, null, null, null, "timestamp DESC");
         while (cursor.moveToNext()) {
             SmsInfo info = new SmsInfo();
             info.id = cursor.getInt(0);
@@ -115,10 +118,10 @@ public class SmsDBHelper extends SQLiteOpenHelper {
         String[] selectionArgs = new String[] { "%" + query + "%", "%" + query + "%" };
 
         // 查询时返回所有需要的字段：id, datetime, sender, content, type
-        String[] columns = { "_id", "datetime", "sender", "content", "type" };
+        String[] columns = { "_id", "datetime", "sender", "content", "type", "timestamp" };
 
         // 执行查询操作
-        Cursor cursor = mRDB.query(TABLE_SMS_INFO, columns, selection, selectionArgs, null, null, null);
+        Cursor cursor = mRDB.query(TABLE_SMS_INFO, columns, selection, selectionArgs, null, null, "timestamp DESC");
 
         // 遍历查询结果并添加到列表中
         while (cursor.moveToNext()) {

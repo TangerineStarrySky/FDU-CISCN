@@ -16,6 +16,7 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -53,6 +54,7 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
         mDBHelper = SmsDBHelper.getInstance(this);
         TextView tv_title = findViewById(R.id.tv_title);
         tv_title.setText("历史记录");
@@ -227,7 +229,7 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
 
     private void showSMS() {
         mSmsList = mDBHelper.queryAllSmsInfo();
-        Collections.reverse(mSmsList);
+//        Collections.reverse(mSmsList);
         if (mSmsList.size() == 0) {
             return;
         }
@@ -246,6 +248,7 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+
         Intent intent = new Intent(HistoryActivity.this, SmsDetailActivity.class);
         intent.putExtra("sms_id", mSmsList.get(position).id);
 //        intent.putExtra("chat_state", chatState);
