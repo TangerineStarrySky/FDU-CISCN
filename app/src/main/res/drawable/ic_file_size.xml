@@ -1,0 +1,14 @@
+<!-- res/drawable/ic_file_size.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="16dp"
+    android:height="16dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <path
+        android:fillColor="#757575"
+        android:pathData="M6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6H6zm0 2h7v5h5v11H6V4z"/>
+    <path
+        android:fillColor="#757575"
+        android:pathData="M12 14H9v2h3v2H9v2h6v-6h-3zm3 0v6h2v-6h-2z"/>
+</vector>

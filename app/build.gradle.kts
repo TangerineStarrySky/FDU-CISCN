@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.ui.tooling.preview.android)
 //    implementation(project(":mlc4j"))
     implementation(libs.navigation.compose)
+//    implementation(libs.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -66,4 +67,8 @@ dependencies {
     implementation ("org.jetbrains.kotlinx","kotlinx-serialization-json","1.6.3")
     implementation(kotlin("stdlib"))
     implementation ("androidx.activity","activity-compose","1.3.1")
+
+    implementation ("com.google.android.exoplayer:exoplayer:2.19.1")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")  // 最新版本
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0") // 处理 Glide 注解
 }
