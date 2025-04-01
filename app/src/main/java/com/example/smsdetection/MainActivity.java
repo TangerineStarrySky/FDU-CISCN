@@ -3,15 +3,18 @@ package com.example.smsdetection;
 
 //import static com.example.smsdetection.model.NavViewKt.NavView;
 
+import static com.example.smsdetection.utils.ChatClient.callWithMessage;
+
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
+//import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
+//import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -21,7 +24,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
+//import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.activity.ComponentActivity;
@@ -29,10 +32,10 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.compose.material3.MaterialTheme;
-import androidx.compose.runtime.Composable;
-import androidx.compose.ui.platform.ComposeView;
+//import androidx.appcompat.app.AppCompatActivity;
+//import androidx.compose.material3.MaterialTheme;
+//import androidx.compose.runtime.Composable;
+//import androidx.compose.ui.platform.ComposeView;
 //import androidx.compose.ui.platform.setContent;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -53,13 +56,13 @@ import com.example.smsdetection.utils.Utils;
 import java.util.Calendar;
 import android.Manifest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 
 public class MainActivity extends ComponentActivity implements View.OnClickListener {
 
-    private static final Logger log = LoggerFactory.getLogger(MainActivity.class);
+//    private static final Logger log = LoggerFactory.getLogger(MainActivity.class);
     private boolean status = false;
     private SmsDBHelper mDBHelper;
     private Button status_btn;
@@ -67,6 +70,16 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
     private TextView output_result;
 
     private SmsGetObserver mObserver;
+//    ypj
+    private boolean isMonitoring = false; // 监控状态标志
+    private String lastPage = ""; // 上一次获取的页面内容
+    private final Handler handler = new Handler(); // 用于定时任务
+    private Runnable monitorTask; // 定时任务
+
+    private boolean isQQMonitoring = false;
+
+    private boolean isWXMonitoring = false;
+//    ypj
 
     private static final String[] PERMISSIONS = new String[]{
 //            Manifest.permission.SEND_SMS,
@@ -109,10 +122,8 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
 //        Log.d("DEBUG", "onCreate: new AppViewModel");
 //        appViewModel.getModelList().get(0).startChat();
 
-        if (Build.VERSION.SDK_INT > 9) {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-        }
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
         TextView tv_title = findViewById(R.id.tv_title);
         tv_title.setText("鹰眼智能识别");
@@ -149,7 +160,7 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
     private class SmsGetObserver extends ContentObserver {
 
         private final Context mContext;
-        private SmsDBHelper mDBHelper;
+        private final SmsDBHelper mDBHelper;
 
         public SmsGetObserver(Context context) {
             super(new Handler(Looper.getMainLooper()));
@@ -181,6 +192,7 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
 
             // 通过内容解析器获取符合条件的结果集游标
             Cursor cursor = mContext.getContentResolver().query(uri, new String[]{"address", "body", "date"}, null, null, "date DESC");
+            assert cursor != null;
             if (cursor.moveToNext()) {
                 // 短信的发送号码
                 String sender = cursor.getString(cursor.getColumnIndex("address"));
@@ -194,7 +206,7 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
                 info.content = content;
                 String result = null;
                 try {
-                    result = chatClient.callWithMessage(info.content, ChatClient.QWEN1_5b);
+                    result = callWithMessage(info.content, ChatClient.QWEN1_5b);
                 } catch (ApiException | NoApiKeyException | InputRequiredException e) {
                     result = e.getMessage();
                 }
@@ -286,10 +298,19 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
         if(vid == R.id.status_switch){
             if(status_btn.getText().toString().equals(getString(R.string.open_analysis))
                     && PermissionUtil.checkPermission(this, PERMISSIONS, REQUEST_CODE_SMS)){
-                status = true;
-                status_btn.setText(R.string.close_analysis);
-                ToastUtil.show(this, "鹰眼智能识别已开启！");
+//                ypj
+                if(startMonitorPage()&&checkQQPermissionAndStart()&&checkWXPermissionAndStart()){
+                    status = true;
+                    status_btn.setText(R.string.close_analysis);
+                    ToastUtil.show(this, "鹰眼智能识别已开启！");
+                }
+//                ypj
             } else if (status_btn.getText().toString().equals(getString(R.string.close_analysis))){
+//                ypj
+                stopMonitorPage();
+                stopMonitorQQ();
+                stopWXMonitor();
+//                ypj
                 status = false;
                 status_btn.setText(R.string.open_analysis);
                 ToastUtil.show(this, "鹰眼智能识别已关闭！");
@@ -326,7 +347,7 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
 //            }
 //            output_result.setText(String.valueOf(SmsDetectService.isStart()));
 
-            check(message, ChatClient.QWEN1_5b);
+            check(message);
 //            checkOnDevice(message, this);
         }
     }
@@ -373,15 +394,16 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
 //        }
 //    }
 
-    private void check(String message, int model_id) {
+    @SuppressLint("SetTextI18n")
+    private void check(String message) {
         try {
 
-            String result = ChatClient.callWithMessage(message, model_id);
+            String result = callWithMessage(message, ChatClient.QWEN1_5b);
 //            String result = chatClient.callWithMessageOnDevice(message);
 //            Log.d("onDevice test", "check: "+result);
 
             if(result.startsWith("否")) {
-                output_result.setText("该短信为普通短信。");
+                output_result.setText("该短信为普通短信。\n"+getCurrentPageInfo());
                 SmsInfo info = new SmsInfo();
                 info.sender = "手动输入";
                 info.type = SmsInfo.SMS_TYPE_COMMON;
@@ -392,8 +414,8 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
                 }
             }
             else if(result.startsWith("是")){
-                String detail = chatClient.callForDetail(message, model_id);
-                output_result.setText("该短信可能为诈骗短信, 请注意防范。\n"+detail);
+                String detail = ChatClient.callForDetail(message, ChatClient.QWEN1_5b);
+                output_result.setText("该短信可能为诈骗短信, 请注意防范。\n"+detail+getCurrentPageInfo());
                 SmsInfo info = new SmsInfo();
                 info.sender = "手动输入";
                 info.type = SmsInfo.SMS_TYPE_DECEIVE;
@@ -405,8 +427,6 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
             }else {
                 output_result.setText("unexpected answer!");
             }
-        } catch (ApiException | NoApiKeyException | InputRequiredException e) {
-            output_result.setText(e.getMessage());
         } catch (Exception e){
             output_result.setText(e.getMessage());
         }
@@ -424,8 +444,8 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
                 ToastUtil.show(this, "鹰眼智能识别已开启！");
             } else {
                 // 部分权限获取失败
-                for (int i = 0; i < grantResults.length; i++) {
-                    if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                for (int grantResult : grantResults) {
+                    if (grantResult != PackageManager.PERMISSION_GRANTED) {
                         ToastUtil.show(this, "获取收发短信权限失败！");
                         jumpToSettings();
                     }
@@ -445,5 +465,210 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
+//    ypj
+    private String getCurrentPageInfo() {
+        // 检查无障碍服务是否启用
+        if (!isAccessibilityEnabled()) {
+            showAccessibilityPrompt();
+            return "请先开启无障碍服务";
+        }
 
+        return TouchHelperService.getWindowLayout();
+    }
+
+    private boolean isAccessibilityEnabled() {
+        String serName = new ComponentName(this, TouchHelperService.class).flattenToString();
+        Log.d("AccessibilityCheck", "Service Name: " + serName);
+//        String serviceName = getPackageName() + "/.TouchHelperService";
+        String serviceName="com.example.smsdetection/com.example.smsdetection.TouchHelperService";
+        int enabled = Settings.Secure.getInt(
+                getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_ENABLED, 0);
+
+        if (enabled == 1) {
+            String services = Settings.Secure.getString(
+                    getContentResolver(),
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+            return services != null && services.contains(serviceName);
+        }
+        return false;
+    }
+
+    private void showAccessibilityPrompt() {
+        runOnUiThread(() -> new AlertDialog.Builder(this)
+                .setTitle("需要无障碍权限")
+                .setMessage("请开启无障碍服务以获取页面信息")
+                .setPositiveButton("去设置", (d, w) -> {
+                    startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                })
+                .setNegativeButton("取消", null)
+                .show());
+    }
+
+    private boolean startMonitorPage() {
+        if(!isAccessibilityEnabled()){
+            showAccessibilityPrompt();
+            return false;
+        }
+        isMonitoring = true; // 设置监控状态为开启
+        monitorTask = new Runnable() {
+            @Override
+            public void run() {
+                if (!isMonitoring) return; // 如果监控已关闭，则停止执行
+
+                // 获取当前页面内容
+                String currentPage = getCurrentPageInfo();
+
+                // 如果当前页面内容与上次不同
+                if (!currentPage.equals(lastPage)) {
+                    lastPage = currentPage; // 更新上一次的页面内容
+
+                    // 调用 AI 判断是否存在诈骗风险
+                    String Fraud = null;
+                    try {
+                        Fraud = callWithMessage(lastPage, ChatClient.QWEN1_5b);
+                    } catch (NoApiKeyException | InputRequiredException e) {
+                        throw new RuntimeException(e);
+                    }
+                    boolean isFraud= Fraud.startsWith("是");
+
+                    // 如果存在诈骗风险，则弹窗警告
+                    if (isFraud) {
+                        runOnUiThread(() -> new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("需要无障碍权限")
+                                .setMessage("请开启无障碍服务以获取页面信息")
+                                .setPositiveButton("去设置", (d, w) -> {
+                                    startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                                })
+                                .setNegativeButton("取消", null)
+                                .show());
+                    }
+                }
+
+                // 每 0.2 秒调用一次
+                handler.postDelayed(this, 200);
+            }
+        };
+
+        // 开始定时任务
+        handler.post(monitorTask);
+        return true;
+    }
+
+    /**
+     * 停止页面监控
+     */
+    private void stopMonitorPage() {
+        isMonitoring = false; // 设置监控状态为关闭
+        if (monitorTask != null) {
+            handler.removeCallbacks(monitorTask); // 移除定时任务
+        }
+    }
+
+    private boolean checkQQPermissionAndStart() {
+        if(!isQQInstalled()) {
+            ToastUtil.show(this, "未安装QQ");
+            return true;
+        }else if (isNotificationListenerEnabled()) {
+            startMonitorQQ();
+            return true;
+        } else {
+            showQQPermissionPrompt();
+            return false;
+        }
+    }
+
+    // 新增：启动QQ监控服务
+    public void startMonitorQQ() {
+        Intent service = new Intent(this, QQNotificationListenerService.class);
+        startService(service);
+        isQQMonitoring = true;
+        ToastUtil.show(this, "QQ监控已开启");
+    }
+
+    // 新增：停止QQ监控服务
+    public void stopMonitorQQ() {
+        Intent service = new Intent(this, QQNotificationListenerService.class);
+        stopService(service);
+        isQQMonitoring = false;
+        ToastUtil.show(this, "QQ监控已关闭");
+    }
+
+    // 新增：检查通知监听权限
+    private boolean isNotificationListenerEnabled() {
+        String pkgName = getPackageName();
+        String flat = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
+        return flat != null && flat.contains(pkgName);
+    }
+
+    // 新增：引导用户开启通知监听权限
+    private void showQQPermissionPrompt() {
+        new AlertDialog.Builder(this)
+                .setTitle("需要通知监听权限")
+                .setMessage("请开启通知监听权限以监控QQ消息")
+                .setPositiveButton("去设置", (dialog, which) -> {
+                    startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+
+
+    private boolean checkWXPermissionAndStart() {
+        if(!isWeChatInstalled()) {
+            ToastUtil.show(this, "未安装微信");
+            return true;
+        }else if (isNotificationListenerEnabled()) {
+            startWXMonitor();
+            ToastUtil.show(this, "微信监控已开启");
+            return true;
+        } else {
+            showWXPermissionPrompt();
+            return false;
+        }
+    }
+
+    private void startWXMonitor() {
+        Intent service = new Intent(this, WXNotificationListenerService.class);
+        startService(service);
+        isWXMonitoring = true;
+    }
+
+    private void stopWXMonitor() {
+        stopService(new Intent(this, WXNotificationListenerService.class));
+        isWXMonitoring = false;
+        ToastUtil.show(this, "微信监控已关闭");
+    }
+
+    private void showWXPermissionPrompt() {
+        new AlertDialog.Builder(this)
+                .setTitle("需要通知监听权限")
+                .setMessage("请开启通知监听权限以监控微信消息")
+                .setPositiveButton("去设置", (dialog, which) -> {
+                    startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+
+    private boolean isWeChatInstalled() {
+        PackageManager pm = getPackageManager();
+        try {
+            pm.getPackageInfo("com.tencent.mm", PackageManager.GET_ACTIVITIES);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    private boolean isQQInstalled() {
+        PackageManager pm = getPackageManager();
+        try {
+            pm.getPackageInfo("com.tencent.mobileqq", PackageManager.GET_ACTIVITIES);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+//    ypj
 }
