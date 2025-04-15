@@ -71,4 +71,7 @@ dependencies {
     implementation ("com.google.android.exoplayer:exoplayer:2.19.1")
     implementation ("com.github.bumptech.glide:glide:4.16.0")  // 最新版本
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0") // 处理 Glide 注解
+
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
 }

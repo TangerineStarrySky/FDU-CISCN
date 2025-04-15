@@ -8,4 +8,20 @@
     <color name="green">#ff00ff00</color>
     <color name="blue">#ff0000ff</color>
     <color name="purple_500">#6200EE</color>
+
+    <!-- 主色调 -->
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+
+    <!-- 背景色 -->
+    <color name="light_gray_background">#F5F5F5</color>
+
+    <!-- 文本颜色 -->
+    <color name="primary_text">#DE000000</color> <!-- 87% 黑色 -->
+    <color name="secondary_text">#8A000000</color> <!-- 54% 黑色 -->
+    <color name="hint_text">#42000000</color> <!-- 26% 黑色 -->
+
+    <!-- 错误颜色 -->
+    <color name="error_color">#B00020</color>
 </resources>

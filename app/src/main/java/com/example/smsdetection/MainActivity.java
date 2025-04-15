@@ -307,7 +307,7 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
             startActivity(intent);
         }else if (vid == R.id.tv_learning){
             Intent intent = new Intent();
-            intent.setClass(MainActivity.this, VideoLearningActivity.class);
+            intent.setClass(MainActivity.this, LearningActivity.class);
 //            intent.setClass(MainActivity.this, VideoActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);

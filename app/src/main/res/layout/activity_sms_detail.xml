@@ -164,4 +164,62 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- 反馈功能区域 -->
+    <LinearLayout
+        android:id="@+id/feedbackSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:background="#F5F5F5">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🤔 系统识别错了吗？请帮我们改进！"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_marginBottom="5dp" />
+
+        <RadioGroup
+            android:id="@+id/feedbackGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="10dp">
+
+            <RadioButton
+                android:id="@+id/radio_correct"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="识别正确 ✅" />
+
+            <RadioButton
+                android:id="@+id/radio_wrong"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="识别错误 ❗" />
+        </RadioGroup>
+
+        <EditText
+            android:id="@+id/feedbackComment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="补充你的理由（可选）"
+            android:background="@android:drawable/edit_text"
+            android:padding="8dp"
+            android:minHeight="60dp"
+            android:layout_marginBottom="10dp" />
+
+        <Button
+            android:id="@+id/submitFeedbackBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="提交反馈"
+            android:background="@color/blue"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
 </LinearLayout>

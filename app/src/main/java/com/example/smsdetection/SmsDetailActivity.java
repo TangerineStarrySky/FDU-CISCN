@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -17,7 +20,10 @@ import androidx.core.view.WindowInsetsCompat;
 import com.alibaba.dashscope.exception.ApiException;
 import com.alibaba.dashscope.exception.InputRequiredException;
 import com.alibaba.dashscope.exception.NoApiKeyException;
+import com.example.smsdetection.api.ApiClient;
+import com.example.smsdetection.api.FeedbackApi;
 import com.example.smsdetection.database.SmsDBHelper;
+import com.example.smsdetection.entity.DetectionFeedback;
 import com.example.smsdetection.entity.SmsInfo;
 //import com.example.smsdetection.model.AppViewModel;
 //import com.example.smsdetection.model.ChatCallback;
@@ -31,6 +37,10 @@ public class SmsDetailActivity extends AppCompatActivity implements View.OnClick
     private TextView detail_result;
     private TextView detail_type;
     private Button detail_btn;
+    private RadioGroup feedbackGroup;
+    private RadioButton radioCorrect;
+    private RadioButton radioWrong;
+    private EditText feedbackComment;
 
 //    private AppViewModel.ChatState chatState;
 
@@ -52,6 +62,8 @@ public class SmsDetailActivity extends AppCompatActivity implements View.OnClick
 
         findViewById(R.id.tv_history).setOnClickListener(this);
         findViewById(R.id.ic_back).setOnClickListener(this);
+        findViewById(R.id.submitFeedbackBtn).setOnClickListener(this);
+
         detail_btn = findViewById(R.id.detail_btn);
         detail_btn.setOnClickListener(this);
 
@@ -60,6 +72,10 @@ public class SmsDetailActivity extends AppCompatActivity implements View.OnClick
         detail_content = findViewById(R.id.detail_content);
         detail_result = findViewById(R.id.detail_result);
         detail_type = findViewById(R.id.detail_type);
+        feedbackGroup = findViewById(R.id.feedbackGroup);
+        radioCorrect = findViewById(R.id.radio_correct);
+        radioWrong = findViewById(R.id.radio_wrong);
+        feedbackComment = findViewById(R.id.feedbackComment);
 
         mDBHelper = SmsDBHelper.getInstance(this);
 
@@ -91,6 +107,49 @@ public class SmsDetailActivity extends AppCompatActivity implements View.OnClick
 //                    detail_result.setText(detail);
 //                }
 //            });
+        } else if (vid == R.id.submitFeedbackBtn) {
+            String content = String.valueOf(detail_content.getText());
+            String detectedResult = detail_type.getText().toString().contains("诈骗") ? "fraud" : "normal";
+
+            int selectedId = feedbackGroup.getCheckedRadioButtonId();
+
+            // 判断哪个选项被选中
+            String userResult = "";
+            if (selectedId == radioCorrect.getId()) {
+                userResult = "correct"; // 用户选择了 "识别正确"
+            } else if (selectedId == radioWrong.getId()) {
+                userResult = "wrong"; // 用户选择了 "识别错误"
+            }
+
+            String comment = feedbackComment.getText().toString();
+            String feedbackTime = String.valueOf(System.currentTimeMillis()); // 或者格式化时间
+
+            feedbackComment.setText("");
+            feedbackGroup.clearCheck();
+
+            DetectionFeedback request = new DetectionFeedback();
+            request.setContent(content);
+            request.setDetectedResult(detectedResult);
+            request.setUserResult(userResult);
+            request.setComment(comment);
+            request.setFeedbackTime(feedbackTime);
+
+            FeedbackApi api = ApiClient.getClient().create(FeedbackApi.class);
+            api.submitFeedback(request).enqueue(new retrofit2.Callback<Void>() {
+                @Override
+                public void onResponse(@NonNull retrofit2.Call<Void> call, @NonNull retrofit2.Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        Log.i("Feedback", "提交成功");
+                    } else {
+                        Log.e("Feedback", "提交失败，状态码: " + response.code());
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull retrofit2.Call<Void> call, @NonNull Throwable t) {
+                    Log.e("Feedback", "提交异常: " + t.getMessage());
+                }
+            });
         }
     }
 
