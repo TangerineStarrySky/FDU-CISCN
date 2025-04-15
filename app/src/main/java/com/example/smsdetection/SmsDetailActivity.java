@@ -9,9 +9,11 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -113,6 +115,12 @@ public class SmsDetailActivity extends AppCompatActivity implements View.OnClick
 
             int selectedId = feedbackGroup.getCheckedRadioButtonId();
 
+            // 验证用户是否选择了选项
+            if (selectedId == -1) {
+                Toast.makeText(this, "请选择识别是否正确", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             // 判断哪个选项被选中
             String userResult = "";
             if (selectedId == radioCorrect.getId()) {
@@ -140,14 +148,29 @@ public class SmsDetailActivity extends AppCompatActivity implements View.OnClick
                 public void onResponse(@NonNull retrofit2.Call<Void> call, @NonNull retrofit2.Response<Void> response) {
                     if (response.isSuccessful()) {
                         Log.i("Feedback", "提交成功");
+                        // 提交成功提示
+                        new AlertDialog.Builder(SmsDetailActivity.this)
+                                .setTitle("提交成功")
+                                .setMessage("感谢您的反馈，我们会持续改进服务！")
+                                .setPositiveButton("确定", null)
+                                .show();
                     } else {
                         Log.e("Feedback", "提交失败，状态码: " + response.code());
+                        // 提交失败提示
+                        Toast.makeText(SmsDetailActivity.this,
+                                "提交失败，错误码: " + response.code(),
+                                Toast.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull retrofit2.Call<Void> call, @NonNull Throwable t) {
                     Log.e("Feedback", "提交异常: " + t.getMessage());
+                    // 网络错误提示
+                    new AlertDialog.Builder(SmsDetailActivity.this)
+                            .setTitle("网络错误")
+                            .setMessage("提交失败，请检查网络连接后重试")
+                            .show();
                 }
             });
         }
