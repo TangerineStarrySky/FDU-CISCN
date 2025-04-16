@@ -403,7 +403,12 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
 //            Log.d("onDevice test", "check: "+result);
 
             if(result.startsWith("否")) {
-                output_result.setText("该短信为普通短信。\n"+getCurrentPageInfo());
+                if (!isAccessibilityEnabled()) {
+                    showAccessibilityPrompt();
+                }
+                else {
+                    output_result.setText("该短信为普通短信。\n" + getCurrentPageInfo());
+                }
                 SmsInfo info = new SmsInfo();
                 info.sender = "手动输入";
                 info.type = SmsInfo.SMS_TYPE_COMMON;
@@ -415,7 +420,13 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
             }
             else if(result.startsWith("是")){
                 String detail = ChatClient.callForDetail(message, ChatClient.QWEN1_5b);
-                output_result.setText("该短信可能为诈骗短信, 请注意防范。\n"+detail+getCurrentPageInfo());
+
+                if (!isAccessibilityEnabled()) {
+                    showAccessibilityPrompt();
+                }
+                else {
+                    output_result.setText("该短信可能为诈骗短信, 请注意防范。\n" + detail + getCurrentPageInfo());
+                }
                 SmsInfo info = new SmsInfo();
                 info.sender = "手动输入";
                 info.type = SmsInfo.SMS_TYPE_DECEIVE;
@@ -467,34 +478,49 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
     }
 //    ypj
     private String getCurrentPageInfo() {
-        // 检查无障碍服务是否启用
-        if (!isAccessibilityEnabled()) {
-            showAccessibilityPrompt();
-            return "请先开启无障碍服务";
+        try {
+            return TouchHelperService.getWindowLayout();
+        } catch (Exception e) {
+            Log.e("MainActivity", "获取页面信息失败", e);
+            return "获取页面信息失败";
         }
-
-        return TouchHelperService.getWindowLayout();
     }
 
     private boolean isAccessibilityEnabled() {
         String serName = new ComponentName(this, TouchHelperService.class).flattenToString();
         Log.d("AccessibilityCheck", "Service Name: " + serName);
 //        String serviceName = getPackageName() + "/.TouchHelperService";
-        String serviceName="com.example.smsdetection/com.example.smsdetection.TouchHelperService";
+//        String serviceName="com.example.smsdetection/com.example.smsdetection.TouchHelperService";
+        ComponentName componentName = new ComponentName(this, TouchHelperService.class);
+        String serviceName = componentName.flattenToString();
+        Log.d("AccessibilityCheck", "Get Name: " + serviceName);
         int enabled = Settings.Secure.getInt(
                 getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_ENABLED, 0);
 
+        Log.d("AccessibilityCheck", "Accessibility: " + Settings.Secure.ACCESSIBILITY_ENABLED+"and:"+enabled);
         if (enabled == 1) {
             String services = Settings.Secure.getString(
                     getContentResolver(),
-                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
-            return services != null && services.contains(serviceName);
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+            );
+            Log.d("AccessibilityCheck", "Service: " + services);
+            // 按冒号分割并遍历检查
+            if (services != null) {
+                for (String service : services.split(":")) {
+                    if (service.equals(serviceName)) {
+                        Log.d("AccessibilityCheck", "True");
+                        return true;
+                    }
+                }
+            }
         }
+        Log.d("AccessibilityCheck", "False");
         return false;
     }
 
     private void showAccessibilityPrompt() {
+        Log.d("AccessibilityCheck", "exe showAccessibility");
         runOnUiThread(() -> new AlertDialog.Builder(this)
                 .setTitle("需要无障碍权限")
                 .setMessage("请开启无障碍服务以获取页面信息")
