@@ -299,10 +299,16 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
             if(status_btn.getText().toString().equals(getString(R.string.open_analysis))
                     && PermissionUtil.checkPermission(this, PERMISSIONS, REQUEST_CODE_SMS)){
 //                ypj
-                if(startMonitorPage()&&checkQQPermissionAndStart()&&checkWXPermissionAndStart()){
+                if(!isNotificationListenerEnabled()){
+                    showNotificationPermissionPrompt();
+                }
+                if(startMonitorPage()&&isNotificationListenerEnabled()&&checkQQPermissionAndStart()&&checkWXPermissionAndStart()){
                     status = true;
                     status_btn.setText(R.string.close_analysis);
                     ToastUtil.show(this, "鹰眼智能识别已开启！");
+                }
+                else{
+                    Log.d("Permission Button","page"+startMonitorPage()+"notification"+isNotificationListenerEnabled()+"QQ"+checkQQPermissionAndStart()+"WX"+checkWXPermissionAndStart());
                 }
 //                ypj
             } else if (status_btn.getText().toString().equals(getString(R.string.close_analysis))){
@@ -548,7 +554,13 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
                 // 如果当前页面内容与上次不同
                 if (!currentPage.equals(lastPage)) {
                     lastPage = currentPage; // 更新上一次的页面内容
-
+                    SmsInfo pagesms = new SmsInfo();
+                    pagesms.id=5201315;
+                    pagesms.content=currentPage;
+                    pagesms.type=2;
+                    pagesms.datetime=Utils.getDate(Calendar.getInstance())+"="+Utils.getNowTime();
+                    pagesms.sender="Page";
+                    mDBHelper.save(pagesms);
                     // 调用 AI 判断是否存在诈骗风险
                     String Fraud = null;
                     try {
@@ -599,6 +611,7 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
             startMonitorQQ();
             return true;
         } else {
+            showNotificationPermissionPrompt();
             showQQPermissionPrompt();
             return false;
         }
@@ -649,6 +662,7 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
             ToastUtil.show(this, "微信监控已开启");
             return true;
         } else {
+            showNotificationPermissionPrompt();
             showWXPermissionPrompt();
             return false;
         }
@@ -695,6 +709,20 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+    }
+
+    private void showNotificationPermissionPrompt() {
+        new AlertDialog.Builder(this)
+                .setTitle("需要通知监听权限") // 设置标题
+                .setMessage("请开启通知监听权限以监控应用通知") // 提示信息
+                .setPositiveButton("去设置", (dialog, which) -> {
+                    // 跳转到通知监听设置页面
+                    Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
+                    startActivity(intent);
+                })
+                .setNegativeButton("取消", null) // 取消按钮，不执行任何操作
+                .setCancelable(false) // 禁止点击外部关闭弹窗
+                .show();
     }
 //    ypj
 }
