@@ -56,7 +56,7 @@ dependencies {
     implementation(libs.material3.android)
     implementation(libs.navigation.runtime.ktx)
     implementation(libs.ui.tooling.preview.android)
-//    implementation(project(":mlc4j"))
+    implementation(project(":mlc4j"))
     implementation(libs.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
