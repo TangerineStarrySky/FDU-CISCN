@@ -1,7 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="50dp"
-    android:background="#aaaaff"
     xmlns:tools="http://schemas.android.com/tools">
 
     <ImageView
@@ -19,7 +18,7 @@
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
         android:gravity="center"
-        android:textColor="@color/black"
+        android:textColor="@color/neon_blue"
         android:textSize="20sp"
         tools:text="主页"/>
 
@@ -29,7 +28,8 @@
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:gravity="center"
-        android:textColor="@color/black"
+        android:layout_marginEnd="20dp"
+        android:textColor="@color/neon_blue"
         android:textSize="20sp"
         tools:text="历史记录"/>
 

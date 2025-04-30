@@ -56,18 +56,87 @@ import com.example.smsdetection.utils.Utils;
 import java.util.Calendar;
 import android.Manifest;
 
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.database.ContentObserver;
+import android.database.Cursor;
+import android.graphics.drawable.AnimationDrawable;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.StrictMode;
+import android.provider.Settings;
+import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.activity.ComponentActivity;
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.compose.material3.MaterialTheme;
+import androidx.compose.runtime.Composable;
+import androidx.compose.ui.platform.ComposeView;
+//import androidx.compose.ui.platform.setContent;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.alibaba.dashscope.exception.ApiException;
+import com.alibaba.dashscope.exception.InputRequiredException;
+import com.alibaba.dashscope.exception.NoApiKeyException;
+import com.example.smsdetection.database.SmsDBHelper;
+import com.example.smsdetection.entity.SmsInfo;
+//import com.example.smsdetection.model.AppViewModel;
+//import com.example.smsdetection.model.ChatCallback;
+import com.example.smsdetection.utils.ChatClient;
+import com.example.smsdetection.utils.PermissionUtil;
+import com.example.smsdetection.utils.ToastUtil;
+import com.example.smsdetection.utils.Utils;
+
+import java.util.Calendar;
+import java.util.Random;
+
+import android.Manifest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class MainActivity extends ComponentActivity implements View.OnClickListener {
 
-//    private static final Logger log = LoggerFactory.getLogger(MainActivity.class);
+    private static final Logger log = LoggerFactory.getLogger(MainActivity.class);
     private boolean status = false;
     private SmsDBHelper mDBHelper;
     private Button status_btn;
     private EditText input_sms;
     private TextView output_result;
+    private ImageView btnMenu;
+    private ImageView btnInfo;
+    private ImageView btnHelp;
+    private ImageView btnSetting;
+    private ImageView btnLearning;
+    private ImageView btnHistory;
+    private ImageView btnFeedback;
+    private ImageView btnShare;
+    private boolean isMenuOpen = false;
 
     private SmsGetObserver mObserver;
 //    ypj
@@ -102,6 +171,25 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
             return insets;
         });
 
+        // 启动背景动画
+        AnimationDrawable animationDrawable = (AnimationDrawable) findViewById(R.id.main).getBackground();
+        animationDrawable.setEnterFadeDuration(2000); // 渐变进入时间
+        animationDrawable.setExitFadeDuration(2000);  // 渐变退出时间
+        animationDrawable.start();
+
+        // 初始化按钮
+        btnMenu = findViewById(R.id.btn_menu);
+        btnInfo = findViewById(R.id.btn_info);
+        btnHelp = findViewById(R.id.btn_help);
+        btnSetting = findViewById(R.id.btn_setting);
+        btnLearning = findViewById(R.id.btn_learning);
+        btnHistory = findViewById(R.id.btn_history);
+        btnFeedback = findViewById(R.id.btn_feedback);
+        btnShare = findViewById(R.id.btn_share);
+
+        // 设置按钮点击事件
+        btnMenu.setOnClickListener(this);
+
         // 获取Compose容器
 //        FrameLayout composeContainer = findViewById(R.id.compose_container);
 
@@ -122,24 +210,29 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
 //        Log.d("DEBUG", "onCreate: new AppViewModel");
 //        appViewModel.getModelList().get(0).startChat();
 
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
+        if (Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
 
-        TextView tv_title = findViewById(R.id.tv_title);
-        tv_title.setText("鹰眼智能识别");
-        TextView tv_history = findViewById(R.id.tv_history);
-        tv_history.setText("历史记录");
-
-        findViewById(R.id.tv_history).setOnClickListener(this);
         findViewById(R.id.btn_detect).setOnClickListener(this);
-        findViewById(R.id.tv_learning).setOnClickListener(this);
-        findViewById(R.id.tv_feedback).setOnClickListener(this);
+        findViewById(R.id.btn_history).setOnClickListener(this);
+        findViewById(R.id.btn_learning).setOnClickListener(this);
+        findViewById(R.id.btn_feedback).setOnClickListener(this);
+        findViewById(R.id.btn_info).setOnClickListener(this);
+        findViewById(R.id.btn_setting).setOnClickListener(this);
+        findViewById(R.id.btn_share).setOnClickListener(this);
+        findViewById(R.id.btn_help).setOnClickListener(this);
 
         status_btn = findViewById(R.id.status_switch);
         status_btn.setOnClickListener(this);
 
         input_sms = findViewById(R.id.input_sms);
         output_result = findViewById(R.id.output_result);
+
+        // 启用滚动功能
+        input_sms.setMovementMethod(new ScrollingMovementMethod());
+        output_result.setMovementMethod(new ScrollingMovementMethod());
 
         mDBHelper = SmsDBHelper.getInstance(this);
         mDBHelper.openReadLink();
@@ -154,6 +247,22 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 //            startForegroundService(serviceIntent); // Android 8.0及以上版本
 //        }
+    }
+
+    private void addRecords(){
+        Random random = new Random();
+        // 随机生成100条记
+        for (int i = 0; i < 1000; i++) {
+            // 随机生成ID
+            SmsInfo info = new SmsInfo();
+            info.datetime = Utils.getDate(Calendar.getInstance()) + "=" + Utils.getNowTime();
+            info.sender = "138000000" + String.format("%01d", random.nextInt(10)); // 随机生成手机号码
+            info.content = "Random content " + random.nextInt(1000); // 随机生成内容
+            info.type = random.nextInt(2); // 0 或 1
+            if (mDBHelper.save(info) > 0) {
+//                ToastUtil.show(this, "短信已存入EagleSight历史记录！");
+            }
+        }
     }
 
 
@@ -321,18 +430,18 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
                 status_btn.setText(R.string.open_analysis);
                 ToastUtil.show(this, "鹰眼智能识别已关闭！");
             }
-        }else if (vid == R.id.tv_history){
+        }else if (vid == R.id.btn_history){
             Intent intent = new Intent();
             intent.setClass(MainActivity.this, HistoryActivity.class);
 //            intent.putExtra("chat_state", appViewModel.getChatState());
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
-        }else if (vid == R.id.tv_learning){
+        }else if (vid == R.id.btn_learning){
             Intent intent = new Intent();
             intent.setClass(MainActivity.this, LearningActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
-        }else if (vid == R.id.tv_feedback){
+        }else if (vid == R.id.btn_feedback){
             Intent intent = new Intent();
             intent.setClass(MainActivity.this, FeedbackActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -355,7 +464,158 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
 
             check(message);
 //            checkOnDevice(message, this);
+        }else if(vid == R.id.btn_menu){
+            if (isMenuOpen) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        } else if(vid == R.id.btn_info){
+            showAppInfo();
+        } else if(vid == R.id.btn_help) {
+            showHelpDialog();
+        } else if(vid == R.id.btn_setting) {
+            Intent intent = new Intent();
+            intent.setClass(MainActivity.this, SettingsActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        } else if(vid == R.id.btn_share) {
+
         }
+    }
+
+    private void showHelpDialog() {
+        // 创建帮助信息对话框
+        new AlertDialog.Builder(this)
+                .setTitle("帮助信息") // 对话框标题
+                .setMessage("欢迎使用我们的应用！\n\n" +
+                        "1. **功能介绍**\n" +
+                        "   - 功能1：描述功能1的用途和操作方法。\n" +
+                        "   - 功能2：描述功能2的用途和操作方法。\n" +
+                        "   - 功能3：描述功能3的用途和操作方法。\n\n" +
+                        "2. **常见问题**\n" +
+                        "   - 问题1：如何解决常见问题1？\n" +
+                        "   - 问题2：如何解决常见问题2？\n\n" +
+                        "3. **联系我们**\n" +
+                        "   - 如果您有任何疑问或需要帮助，请通过以下方式联系我们：\n" +
+                        "     - 邮箱：support@example.com\n" +
+                        "     - 官方网站：https://example.com\n")
+                .setPositiveButton("确定", null) // 添加一个“确定”按钮
+                .setNegativeButton("更多帮助", (dialog, which) -> {
+                    // 点击“更多帮助”按钮时的操作
+                    // 例如：跳转到一个网页或打开一个帮助文档
+                })
+                .show(); // 显示对话框
+    }
+
+    private void showAppInfo() {
+        try {
+            // 获取当前应用的包信息
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+
+            // 构建要显示的 APP 信息
+            String appName = getString(packageInfo.applicationInfo.labelRes);
+            String packageName = packageInfo.packageName;
+            String versionName = packageInfo.versionName;
+            int versionCode = packageInfo.versionCode;
+
+            // 创建对话框
+            new AlertDialog.Builder(this)
+                    .setTitle("APP 信息")
+                    .setMessage("应用名称: " + appName + "\n" +
+                            "包名: " + packageName + "\n" +
+                            "版本名称: " + versionName + "\n" +
+                            "版本号: " + versionCode)
+                    .setPositiveButton("确定", null)
+                    .show();
+        } catch (PackageManager.NameNotFoundException e) {
+            new AlertDialog.Builder(this)
+                    .setTitle("错误")
+                    .setMessage("无法获取 APP 信息")
+                    .setPositiveButton("确定", null)
+                    .show();
+        }
+    }
+
+    private void openMenu() {
+        isMenuOpen = true;
+
+        // 展开动画
+        // btnSetting
+        ObjectAnimator.ofFloat(btnSetting, "translationY", -200f).setDuration(300).start();
+        ObjectAnimator.ofFloat(btnSetting, "translationX", -200f).setDuration(300).start();
+
+        // btnInfo
+        ObjectAnimator.ofFloat(btnInfo, "translationX", -200f).setDuration(300).start();
+
+        // btnHelp
+        ObjectAnimator.ofFloat(btnHelp, "translationY", -200f).setDuration(300).start();
+
+        // btnLearning
+        ObjectAnimator.ofFloat(btnLearning, "translationY", -200f).setDuration(300).start();
+        ObjectAnimator.ofFloat(btnLearning, "translationX", -400f).setDuration(300).start();
+
+        // btnHistory
+        ObjectAnimator.ofFloat(btnHistory, "translationY", -200f).setDuration(300).start();
+        ObjectAnimator.ofFloat(btnHistory, "translationX", -600f).setDuration(300).start();
+
+        // btnFeedback
+        ObjectAnimator.ofFloat(btnFeedback, "translationX", -600f).setDuration(300).start();
+
+        // btnShare
+        ObjectAnimator.ofFloat(btnShare, "translationX", -400f).setDuration(300).start();
+
+        // 设置可见性
+        btnInfo.setVisibility(View.VISIBLE);
+        btnHelp.setVisibility(View.VISIBLE);
+        btnSetting.setVisibility(View.VISIBLE);
+        btnLearning.setVisibility(View.VISIBLE);
+        btnHistory.setVisibility(View.VISIBLE);
+        btnFeedback.setVisibility(View.VISIBLE);
+        btnShare.setVisibility(View.VISIBLE);
+    }
+
+    private void closeMenu() {
+        isMenuOpen = false;
+
+        // 收起动画
+        ObjectAnimator.ofFloat(btnSetting, "translationY", -80f).setDuration(300).start();
+        ObjectAnimator.ofFloat(btnSetting, "translationX", -80f).setDuration(300).start();
+        ObjectAnimator.ofFloat(btnInfo, "translationX", -80f).setDuration(300).start();
+        ObjectAnimator.ofFloat(btnHelp, "translationY", -80f).setDuration(300).start();
+        ObjectAnimator.ofFloat(btnLearning, "translationY", -80f).setDuration(300).start();
+        ObjectAnimator.ofFloat(btnLearning, "translationX", -80f).setDuration(300).start();
+        ObjectAnimator.ofFloat(btnHistory, "translationY", -80f).setDuration(300).start();
+        ObjectAnimator.ofFloat(btnHistory, "translationX", -80f).setDuration(300).start();
+        ObjectAnimator.ofFloat(btnShare, "translationX", -80f).setDuration(300).start();
+        ObjectAnimator animator = ObjectAnimator.ofFloat(btnFeedback, "translationX", -80f).setDuration(300);
+
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation) {
+                // 设置隐藏
+                btnInfo.setVisibility(View.GONE);
+                btnHelp.setVisibility(View.GONE);
+                btnSetting.setVisibility(View.GONE);
+                btnLearning.setVisibility(View.GONE);
+                btnHistory.setVisibility(View.GONE);
+                btnFeedback.setVisibility(View.GONE);
+                btnShare.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(@NonNull Animator animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(@NonNull Animator animation) {
+            }
+        });
+        animator.start();
     }
 //
 //    private void checkOnDevice(String message, Context context){
