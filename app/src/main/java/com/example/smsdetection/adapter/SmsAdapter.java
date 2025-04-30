@@ -58,8 +58,6 @@ public class SmsAdapter extends BaseAdapter {
             // 获取布局文件item_cart.xml的根视图
             convertView = LayoutInflater.from(mContext).inflate(R.layout.item_sms, null);
             holder.checkBox = convertView.findViewById(R.id.checkBox);
-//            holder.item_date = convertView.findViewById(R.id.item_date);
-//            holder.item_time = convertView.findViewById(R.id.item_time);
             holder.item_datetime = convertView.findViewById(R.id.item_datetime);
             holder.item_sender = convertView.findViewById(R.id.item_sender);
             holder.item_content = convertView.findViewById(R.id.item_content);
@@ -71,8 +69,6 @@ public class SmsAdapter extends BaseAdapter {
 
         SmsInfo info = mSmsList.get(position);
         String[] strs = info.datetime.split("=");
-//        holder.item_date.setText(strs[0]);
-//        holder.item_time.setText(strs[1]);
         holder.item_datetime.setText(strs[0] + strs[1]);
         holder.item_sender.setText(info.sender.length() < 14? info.sender:info.sender.substring(0,14)+"……");
         holder.item_content.setText(info.content.length() < 46? info.content:info.content.substring(0,46)+"……");
