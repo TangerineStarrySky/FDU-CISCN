@@ -12,15 +12,30 @@ import com.example.smsdetection.R;
 import com.example.smsdetection.entity.SmsInfo;
 
 import java.util.List;
-
+//fwk
+import android.app.Activity;
+import java.util.ArrayList;
+import android.widget.CheckBox;
+//fwk
 public class SmsAdapter extends BaseAdapter {
 
     private Context mContext;
     private List<SmsInfo> mSmsList;
 
+    private boolean isEditMode = false;
+
     public SmsAdapter(Context mContext, List<SmsInfo> mSmsList) {
         this.mContext = mContext;
         this.mSmsList = mSmsList;
+    }
+
+    public void setEditMode(boolean isEditMode) {
+        this.isEditMode = isEditMode;
+        notifyDataSetChanged();// 刷新列表
+    }
+
+    public boolean getEditMode() {
+        return isEditMode;
     }
 
     @Override
@@ -45,6 +60,10 @@ public class SmsAdapter extends BaseAdapter {
             holder = new ViewHolder();
             // 获取布局文件item_cart.xml的根视图
             convertView = LayoutInflater.from(mContext).inflate(R.layout.item_sms, null);
+//            fwk
+            holder.checkBox = convertView.findViewById(R.id.checkBox);
+            holder.item_datetime = convertView.findViewById(R.id.item_datetime);
+//            fwk
             holder.item_date = convertView.findViewById(R.id.item_date);
             holder.item_time = convertView.findViewById(R.id.item_time);
             holder.item_sender = convertView.findViewById(R.id.item_sender);
@@ -65,8 +84,59 @@ public class SmsAdapter extends BaseAdapter {
         holder.item_type.setText(info.type==1?"诈骗":"普通");
         holder.ic_warning.setVisibility(info.type==1?View.VISIBLE:View.GONE);
         holder.item_type.setTextColor(info.type==1?convertView.getResources().getColor(R.color.red):convertView.getResources().getColor(R.color.green));
+//fwk
+        // 根据编辑模式显示或隐藏CheckBox
+        if (isEditMode) {
+            holder.checkBox.setVisibility(View.VISIBLE);
+            holder.checkBox.setChecked(info.isSelected);
+        } else {
+            holder.checkBox.setVisibility(View.GONE);
+        }
+
+        // 处理CheckBox的点击事件
+        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            info.isSelected = isChecked;
+
+            // Update the "Select All" CheckBox in the activity
+            updateSelectAllCheckBoxState();
+        });
+//fwk
         return convertView;
     }
+//    fwk
+    /**
+            * 更新选择所有按钮
+     */
+    private void updateSelectAllCheckBoxState() {
+        CheckBox checkBoxSelectAll = ((Activity) mContext).findViewById(R.id.select_all);
+        if (checkBoxSelectAll != null) {
+            boolean allSelected = areAllItemsSelected();
+            checkBoxSelectAll.setChecked(allSelected);
+        }
+    }
+
+    /**
+     * 检查是否所有项都被选中
+     */
+    private boolean areAllItemsSelected() {
+        if (mSmsList.isEmpty()) return false;
+        for (SmsInfo info : mSmsList) {
+            if (!info.isSelected) return false;
+        }
+        return true;
+    }
+
+    // 获取选中的项
+    public List<SmsInfo> getSelectedItems() {
+        List<SmsInfo> selectedItems = new ArrayList<>();
+        for (SmsInfo info : mSmsList) {
+            if (info.isSelected) {
+                selectedItems.add(info);
+            }
+        }
+        return selectedItems;
+    }
+//    fwk
 
     public static final class ViewHolder {
         public TextView item_date;
@@ -75,5 +145,8 @@ public class SmsAdapter extends BaseAdapter {
         public TextView item_content;
         public TextView item_type;
         public ImageView ic_warning;
+
+        public TextView item_datetime;
+        public CheckBox checkBox;
     }
 }

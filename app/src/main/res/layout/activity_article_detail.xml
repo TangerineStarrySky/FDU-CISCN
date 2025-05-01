@@ -1,0 +1,57 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:orientation="vertical"
+    android:background="#FAFAFA"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 标题卡片（带背景、圆角、居中标题） -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:gravity="center"
+            android:padding="16dp"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="主题标题" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- 内容区域，滚动显示 -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <TextView
+                android:id="@+id/tv_detail"
+                android:padding="16dp"
+                android:textSize="16sp"
+                android:lineSpacingExtra="6dp"
+                android:textColor="#555555"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="反诈详细内容..." />
+        </androidx.cardview.widget.CardView>
+
+    </ScrollView>
+
+</LinearLayout>

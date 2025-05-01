@@ -37,4 +37,17 @@ public class Utils {
         InputMethodManager imm = (InputMethodManager) act.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
+//    fwk
+    // 将时间戳转换为日期字符串（格式：yyyy-MM-dd）
+    public static String formatDate(long timestamp) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return sdf.format(new Date(timestamp));
+    }
+
+    // 将时间戳转换为时间字符串（格式：HH:mm:ss）
+    public static String formatTime(long timestamp) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+        return sdf.format(new Date(timestamp));
+    }
+//    fwk
 }

@@ -2,82 +2,115 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@drawable/glass_background">
+    android:orientation="vertical">
 
     <include layout="@layout/title_sms"/>
 
-    <ScrollView
+    <!-- 导航栏 -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <LinearLayout
+        android:layout_height="wrap_content"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@color/black"
+        app:tabTextColor="@color/black"
+        app:tabSelectedTextColor="@color/black">
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tab_article"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="反诈宝典"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tab_video"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="反诈视频"/>
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <LinearLayout
+        android:id="@+id/learning_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="10dp">
+
+        <ListView
+            android:id="@+id/learning_description"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="反诈知识学习"
-                android:textSize="40sp"
-                android:textColor="@color/white"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp"/>
+    </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/eight_always"
-                android:textColor="@color/white"
-                android:textSize="25sp"
-                android:layout_marginBottom="8dp"/>
+<!--    <ScrollView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent">-->
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:orientation="vertical"-->
+<!--            android:padding="16dp">-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:textColor="@color/white"
-                android:text="@string/eight_always_detail"
-                android:textSize="17sp" />
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="反诈知识学习"-->
+<!--                android:textSize="40sp"-->
+<!--                android:textStyle="bold"-->
+<!--                android:layout_marginBottom="16dp"/>-->
 
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="@string/eight_always"-->
+<!--                android:textSize="25sp"-->
+<!--                android:layout_marginBottom="8dp"/>-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ten_frequency"
-                android:textColor="@color/white"
-                android:textSize="25sp"
-                android:layout_marginBottom="8dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:layout_marginBottom="8dp"
-                android:text="@string/ten_frequency_detail"
-                android:textSize="17sp" />
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginBottom="8dp"-->
+<!--                android:text="@string/eight_always_detail"-->
+<!--                android:textSize="17sp" />-->
 
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/seven_tools"
-                android:textColor="@color/white"
-                android:textSize="25sp"
-                android:layout_marginBottom="8dp"/>
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="@string/ten_frequency"-->
+<!--                android:textSize="25sp"-->
+<!--                android:layout_marginBottom="8dp"/>-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:layout_marginBottom="8dp"
-                android:text="@string/seven_tools_detail"
-                android:textSize="17sp" />
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginBottom="8dp"-->
+<!--                android:text="@string/ten_frequency_detail"-->
+<!--                android:textSize="17sp" />-->
 
 
-        </LinearLayout>
-    </ScrollView>
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="@string/seven_tools"-->
+<!--                android:textSize="25sp"-->
+<!--                android:layout_marginBottom="8dp"/>-->
+
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginBottom="8dp"-->
+<!--                android:text="@string/seven_tools_detail"-->
+<!--                android:textSize="17sp" />-->
+
+
+<!--        </LinearLayout>-->
+<!--    </ScrollView>-->
 </LinearLayout>
