@@ -31,6 +31,13 @@
         android:theme="@style/Theme.SMSdetection"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_settings" />
+        <activity
+            android:name=".StatisticsActivity"
+            android:exported="false" />
 
 <!--        ypj-->
         <!-- 无障碍服务声明 -->
@@ -64,6 +71,23 @@
             </intent-filter>
         </service>
 <!--        ypj-->
+        <activity
+            android:name=".ArticleDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".VideoPlayerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DetectionSelectionActivity"
+            android:exported="false"
+            android:label="@string/title_activity_detection_selection"
+            android:theme="@style/Theme.SMSdetection" />
+        <activity
+            android:name=".DetectionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".VideoLearningActivity"
+            android:exported="false" />
         <uses-native-library
             android:name="libOpenCL.so"
             android:required="false"/>
