@@ -1,4 +1,4 @@
-package com.example.smsdetection;
+package com.example.smsdetection.merge;
 
 import android.content.Intent;
 import android.os.Bundle;
