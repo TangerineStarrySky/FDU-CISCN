@@ -84,18 +84,6 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />
-<!--        fwk-->
-        <LinearLayout
-            android:id="@+id/long_click_interface"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@color/black"
-            android:visibility="gone"
-            android:padding="0dp"
-            app:layout_constraintBottom_toBottomOf="parent">
-        </LinearLayout>
-<!--fwk-->
 
         <LinearLayout
             android:id="@+id/bottom_layout"
@@ -103,19 +91,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="0dp">
-
-            <Button
-                android:id="@+id/btn_clear"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="清空"
-                android:textColor="@color/black"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:textSize="20sp"
-                android:background="@drawable/neon_button"/>
 
             <TextView
                 android:layout_width="0dp"
@@ -135,6 +110,38 @@
                 android:gravity="center|left"
                 android:textSize="25sp" />
 
+        </LinearLayout>
+
+        <!--        fwk-->
+        <LinearLayout
+            android:id="@+id/long_click_interface"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/glass_background"
+            android:visibility="gone"
+            android:padding="0dp"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <Button
+                android:id="@+id/btn_clear"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="清空"
+                android:textColor="@color/white"
+                android:background="@drawable/neon_button"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center|right"
+                android:text="总记录数："
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
             <CheckBox
                 android:id="@+id/select_all"
                 android:layout_width="wrap_content"
@@ -145,8 +152,8 @@
                 android:layoutDirection="rtl"
                 android:textDirection="ltr"
                 android:textSize="20sp" />
-
         </LinearLayout>
+        <!--fwk-->
     </LinearLayout>
 
 </LinearLayout>

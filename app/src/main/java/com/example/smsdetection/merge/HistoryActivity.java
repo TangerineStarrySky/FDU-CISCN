@@ -1,4 +1,4 @@
-package com.example.smsdetection;
+package com.example.smsdetection.merge;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,19 +16,17 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.smsdetection.R;
+import com.example.smsdetection.SmsDetailActivity;
 import com.example.smsdetection.adapter.SmsAdapter;
 import com.example.smsdetection.database.SmsDBHelper;
 import com.example.smsdetection.entity.SmsInfo;
-//import com.example.smsdetection.model.AppViewModel;
 import com.example.smsdetection.utils.ToastUtil;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class HistoryActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
@@ -56,19 +54,19 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
         });
 
         mDBHelper = SmsDBHelper.getInstance(this);
-//        TextView tv_title = findViewById(R.id.tv_title);
-//        tv_title.setText("历史记录");
-//        TextView tv_history = findViewById(R.id.tv_history);
-//        tv_history.setText("");
+        TextView tv_title = findViewById(R.id.tv_title);
+        tv_title.setText("历史记录");
+        TextView tv_history = findViewById(R.id.tv_history);
+        tv_history.setText("");
 
-//        findViewById(R.id.ic_back).setOnClickListener(this);
+        findViewById(R.id.ic_back).setOnClickListener(this);
         findViewById(R.id.btn_clear).setOnClickListener(this);
 
         lv_sms = findViewById(R.id.lv_sms);
         tv_total_num = findViewById(R.id.tv_total_num);
         long_click_interface = findViewById(R.id.long_click_interface);
 
-        search_box = findViewById(R.id.et_search);
+        search_box = findViewById(R.id.search_box);
         search_box.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -175,16 +173,6 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
                 // 如果不在编辑模式，弹出确认对话框清空所有记录
                 showClearAllDialog();
             }
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mSmsAdapter.getEditMode()) {
-            mSmsAdapter.setEditMode(false);
-            long_click_interface.setVisibility(View.GONE);
-        } else {
-            super.onBackPressed(); // 调用父类的默认行为：关闭Activity或处理Fragment回退
         }
     }
 
