@@ -33,7 +33,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class LearningActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
-    private TabLayout tabLayout;
+//    private TabLayout tabLayout;
     private ListView learningDescriptionListView;
 
     private List<ArticleLearning> articles = new ArrayList<>();
@@ -57,26 +57,26 @@ public class LearningActivity extends AppCompatActivity implements AdapterView.O
         learningDescriptionListView = findViewById(R.id.learning_description);
         learningDescriptionListView.setOnItemClickListener(this);
 
-        tabLayout = findViewById(R.id.tabLayout);
+//        tabLayout = findViewById(R.id.tabLayout);
 
         // 监听 Tab 切换
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(@NonNull TabLayout.Tab tab) {
-                if (tab.getPosition() == 1) { // 第2个 Tab（索引从 0 开始）
-                    Intent intent = new Intent(LearningActivity.this, VideoLearningActivity.class);
-                    startActivity(intent);
-                }
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-                // 这里可以添加“重复点击”的逻辑
-            }
-        });
+//        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+//            @Override
+//            public void onTabSelected(@NonNull TabLayout.Tab tab) {
+//                if (tab.getPosition() == 1) { // 第2个 Tab（索引从 0 开始）
+//                    Intent intent = new Intent(LearningActivity.this, VideoLearningActivity.class);
+//                    startActivity(intent);
+//                }
+//            }
+//
+//            @Override
+//            public void onTabUnselected(TabLayout.Tab tab) {}
+//
+//            @Override
+//            public void onTabReselected(TabLayout.Tab tab) {
+//                // 这里可以添加“重复点击”的逻辑
+//            }
+//        });
 
         // 调用 Retrofit 请求 API 数据
         fetchArticles();

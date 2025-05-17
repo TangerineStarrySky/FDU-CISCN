@@ -133,14 +133,14 @@
                 android:background="@drawable/neon_button"
                 android:textSize="20sp" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center|right"
-                android:text="总记录数："
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+<!--            <TextView-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:layout_weight="1"-->
+<!--                android:gravity="center|right"-->
+<!--                android:text="总记录数："-->
+<!--                android:textColor="@color/white"-->
+<!--                android:textSize="20sp" />-->
 
             <CheckBox
                 android:id="@+id/select_all"
