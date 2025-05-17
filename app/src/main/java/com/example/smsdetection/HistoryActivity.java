@@ -259,32 +259,24 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
 
-        Intent intent = new Intent(HistoryActivity.this, SmsDetailActivity.class);
-        intent.putExtra("sms_id", mSmsList.get(position).id);
+        if (mSmsAdapter.getEditMode()) {
+            // 处于编辑模式，点击 item 切换选中状态
+            SmsInfo info = mSmsList.get(position);
+            info.isSelected = !info.isSelected;
+            mSmsAdapter.notifyDataSetChanged(); // 刷新背景
+            mSmsAdapter.updateSelectAllCheckBoxState();
+        } else {
+            Intent intent = new Intent(HistoryActivity.this, SmsDetailActivity.class);
+            intent.putExtra("sms_id", mSmsList.get(position).id);
 //        intent.putExtra("chat_state", chatState);
-        startActivity(intent);
+            startActivity(intent);
+        }
     }
 
     @Override
     public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l) {
         mSmsAdapter.setEditMode(true);
         long_click_interface.setVisibility(View.VISIBLE);
-//        checkBox_select_all.setVisibility(View.VISIBLE);
-//        SmsInfo info = mSmsList.get(position);
-//        AlertDialog.Builder builder = new AlertDialog.Builder(HistoryActivity.this);
-//        builder.setMessage("是否删除此条信息？");
-//        builder.setPositiveButton("是", (dialog, which) -> {
-//            // 删除该商品
-//            mDBHelper.deleteSmsInfoById(info.id);
-//            mSmsList.remove(position);
-//            // 通知适配器发生了数据变化
-//            mSmsAdapter.notifyDataSetChanged();
-//            // 刷新总数
-//            refreshTotalNum();
-//            ToastUtil.show(this, "已删除该信息！");
-//        });
-//        builder.setNegativeButton("否", null);
-//        builder.create().show();
         return true;
     }
 }

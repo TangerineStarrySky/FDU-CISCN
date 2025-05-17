@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.smsdetection.R;
@@ -16,6 +17,9 @@ import java.util.List;
 import android.app.Activity;
 import java.util.ArrayList;
 import android.widget.CheckBox;
+
+import androidx.core.content.ContextCompat;
+
 //fwk
 public class SmsAdapter extends BaseAdapter {
 
@@ -70,6 +74,7 @@ public class SmsAdapter extends BaseAdapter {
             holder.item_content = convertView.findViewById(R.id.item_content);
             holder.item_type = convertView.findViewById(R.id.item_type);
             holder.ic_warning = convertView.findViewById(R.id.ic_warning);
+            holder.card = convertView.findViewById(R.id.card);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -86,20 +91,52 @@ public class SmsAdapter extends BaseAdapter {
         holder.item_type.setTextColor(info.type==1?convertView.getResources().getColor(R.color.red):convertView.getResources().getColor(R.color.green));
 //fwk
         // 根据编辑模式显示或隐藏CheckBox
-        if (isEditMode) {
-            holder.checkBox.setVisibility(View.VISIBLE);
-            holder.checkBox.setChecked(info.isSelected);
+//        if (isEditMode) {
+//            holder.checkBox.setVisibility(View.VISIBLE);
+//            holder.checkBox.setChecked(info.isSelected);
+//        } else {
+//            holder.checkBox.setVisibility(View.GONE);
+//        }
+
+        // 设置选中状态对应的背景
+        if (info.isSelected) {
+            holder.card.setBackground(
+                    ContextCompat.getDrawable(mContext, R.drawable.glass_green_border_card)
+            );
         } else {
-            holder.checkBox.setVisibility(View.GONE);
+            holder.card.setBackground(
+                    ContextCompat.getDrawable(mContext, R.drawable.glass_card)
+            );
         }
 
         // 处理CheckBox的点击事件
-        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            info.isSelected = isChecked;
+//        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//            info.isSelected = isChecked;
+//
+//            // Update the "Select All" CheckBox in the activity
+//            updateSelectAllCheckBoxState();
+//        });
 
-            // Update the "Select All" CheckBox in the activity
-            updateSelectAllCheckBoxState();
-        });
+//        // 点击整个item来选中或取消选中
+//        holder.card.setOnClickListener(v -> {
+//            // 切换选中状态
+//            info.isSelected = !info.isSelected;
+//
+//            // 更新UI
+//            if (info.isSelected) {
+//                holder.card.setBackground(
+//                        ContextCompat.getDrawable(mContext, R.drawable.glass_green_border_card)
+//                );
+//            } else {
+//                holder.card.setBackground(
+//                        ContextCompat.getDrawable(mContext, R.drawable.glass_card)
+//                );
+//            }
+//
+//            // 更新“全选”CheckBox状态
+//            updateSelectAllCheckBoxState();
+//        });
+
 //fwk
         return convertView;
     }
@@ -107,7 +144,7 @@ public class SmsAdapter extends BaseAdapter {
     /**
             * 更新选择所有按钮
      */
-    private void updateSelectAllCheckBoxState() {
+    public void updateSelectAllCheckBoxState() {
         CheckBox checkBoxSelectAll = ((Activity) mContext).findViewById(R.id.select_all);
         if (checkBoxSelectAll != null) {
             boolean allSelected = areAllItemsSelected();
@@ -147,5 +184,6 @@ public class SmsAdapter extends BaseAdapter {
         public TextView item_type;
         public ImageView ic_warning;
         public CheckBox checkBox;
+        public LinearLayout card;
     }
 }
