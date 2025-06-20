@@ -27,5 +27,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "SMSdetection"
 include(":app")
-include(":mlc4j")
-project(":mlc4j").projectDir = file("dist/lib/mlc4j")
+include(":dist:lib:mlc4j")
+project(":dist:lib:mlc4j").projectDir = file("dist/lib/mlc4j")

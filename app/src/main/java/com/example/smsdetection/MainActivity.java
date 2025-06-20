@@ -52,7 +52,9 @@ import com.example.smsdetection.utils.ChatClient;
 import com.example.smsdetection.utils.PermissionUtil;
 import com.example.smsdetection.utils.ToastUtil;
 import com.example.smsdetection.utils.Utils;
+import com.example.smsdetection.utils.LocalChatClient;
 
+import java.io.File;
 import java.util.Calendar;
 import android.Manifest;
 
@@ -163,6 +165,7 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        checkTVMLibraryLoaded();
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -461,9 +464,11 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
 //                return;
 //            }
 //            output_result.setText(String.valueOf(SmsDetectService.isStart()));
-
-            check(message);
-//            checkOnDevice(message, this);
+//ypj_test
+//            check(message);
+//ypj_test
+            checkLocal(message);
+            //            checkOnDevice(message, this);
         }else if(vid == R.id.btn_menu){
             if (isMenuOpen) {
                 closeMenu();
@@ -704,6 +709,56 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
             }else {
                 output_result.setText("unexpected answer!");
             }
+        } catch (Exception e){
+            output_result.setText(e.getMessage());
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void checkLocal(String message) {
+        try {
+
+            String result = LocalChatClient.callWithMessage(message);
+            output_result.setText(result);
+//            String result = chatClient.callWithMessageOnDevice(message);
+//            Log.d("onDevice test", "check: "+result);
+
+//            if(result.startsWith("否")) {
+//                if (!isAccessibilityEnabled()) {
+//                    showAccessibilityPrompt();
+//                }
+//                else {
+//                    output_result.setText("该短信为普通短信。\n" + getCurrentPageInfo());
+//                }
+//                SmsInfo info = new SmsInfo();
+//                info.sender = "手动输入";
+//                info.type = SmsInfo.SMS_TYPE_COMMON;
+//                info.content = message;
+//                info.datetime = Utils.getDate(Calendar.getInstance())+"="+Utils.getNowTime();
+//                if (mDBHelper.save(info)>0){
+//                    ToastUtil.show(this, "短信已存入历史记录！");
+//                }
+//            }
+//            else if(result.startsWith("是")){
+//                String detail = ChatClient.callForDetail(message, ChatClient.QWEN1_5b);
+//
+//                if (!isAccessibilityEnabled()) {
+//                    showAccessibilityPrompt();
+//                }
+//                else {
+//                    output_result.setText("该短信可能为诈骗短信, 请注意防范。\n" + detail + getCurrentPageInfo());
+//                }
+//                SmsInfo info = new SmsInfo();
+//                info.sender = "手动输入";
+//                info.type = SmsInfo.SMS_TYPE_DECEIVE;
+//                info.content = message;
+//                info.datetime = Utils.getDate(Calendar.getInstance())+"="+Utils.getNowTime();
+//                if (mDBHelper.save(info)>0){
+//                    ToastUtil.show(this, "短信已存入历史记录！");
+//                }
+//            }else {
+//                output_result.setText("unexpected answer!");
+//            }
         } catch (Exception e){
             output_result.setText(e.getMessage());
         }
@@ -982,6 +1037,81 @@ public class MainActivity extends ComponentActivity implements View.OnClickListe
                 })
                 .setNegativeButton("取消", null) // 取消按钮，不执行任何操作
                 .setCancelable(false) // 禁止点击外部关闭弹窗
+                .show();
+    }
+    private void checkTVMLibraryLoaded() {
+        try {
+            // 打印库搜索路径
+            String javaLibraryPath = System.getProperty("java.library.path");
+            String nativeLibraryDir = getApplicationInfo().nativeLibraryDir;
+            Log.d("TVM", "Java library path: " + javaLibraryPath);
+            Log.d("TVM", "Native library directory: " + nativeLibraryDir);
+
+            // 列出本地库目录中的文件
+            File libDir = new File(nativeLibraryDir);
+            String[] libFiles = libDir.list();
+            if (libFiles != null) {
+                StringBuilder sb = new StringBuilder("Files in lib directory:\n");
+                for (String file : libFiles) {
+                    sb.append(file).append("\n");
+                }
+                Log.d("TVM", sb.toString());
+            } else {
+                Log.e("TVM", "No files in native library directory");
+            }
+
+            // 尝试显式加载库
+            try {
+                System.loadLibrary("tvm4j_runtime_packed");
+                Log.d("TVM", "Successfully loaded tvm4j_runtime_packed");
+            } catch (UnsatisfiedLinkError e) {
+                Log.e("TVM", "Failed to load tvm4j_runtime_packed", e);
+
+                // 尝试加载其他可能的库名变体
+                tryLoadVariants();
+            }
+
+            // 尝试调用TVM API
+            Class.forName("org.apache.tvm.Function");
+            Log.d("TVM", "TVM classes loaded successfully");
+
+        } catch (ClassNotFoundException e) {
+            Log.e("TVM", "TVM classes not available", e);
+            showErrorDialog("TVM engine classes missing. Possible build issue.");
+        } catch (Exception e) {
+            Log.e("TVM", "Unexpected error", e);
+            showErrorDialog("AI engine error: " + e.getMessage());
+        }
+    }
+
+    private void tryLoadVariants() {
+        String[] possibleNames = {
+                "tvm4j_runtime_packed",
+                "tvm4j",
+                "tvm4j_runtime",
+                "libtvm4j_runtime_packed",
+                "libtvm4j"
+        };
+
+        for (String name : possibleNames) {
+            try {
+                System.loadLibrary(name);
+                Log.d("TVM", "Successfully loaded library: " + name);
+                return;
+            } catch (UnsatisfiedLinkError e) {
+                Log.w("TVM", "Failed to load " + name + ": " + e.getMessage());
+            }
+        }
+        Log.e("TVM", "All library variants failed to load");
+    }
+
+    private void showErrorDialog(String message) {
+        new AlertDialog.Builder(this)
+                .setTitle("AI Engine Error")
+                .setMessage(message + "\n\nNative lib directory: " + getApplicationInfo().nativeLibraryDir)
+                .setPositiveButton("Retry", (dialog, which) -> checkTVMLibraryLoaded())
+                .setNegativeButton("Exit", (dialog, which) -> finish())
+                .setCancelable(false)
                 .show();
     }
 //    ypj

@@ -42,6 +42,11 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.0.4"
     }
+    sourceSets {
+        getByName("main") {
+            jniLibs.srcDirs(listOf(project(":dist:lib:mlc4j").projectDir.resolve("output")))
+        }
+    }
 }
 
 dependencies {
@@ -56,7 +61,7 @@ dependencies {
     implementation(libs.material3.android)
     implementation(libs.navigation.runtime.ktx)
     implementation(libs.ui.tooling.preview.android)
-    implementation(project(":mlc4j"))
+    implementation(project(":dist:lib:mlc4j"))
     implementation(libs.navigation.compose)
     implementation(libs.preference)
     testImplementation(libs.junit)
@@ -75,4 +80,14 @@ dependencies {
 
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // Kotlin 协程支持（强烈推荐）
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // Kotlinx Serialization
+    implementation("org.jetbrains.kotlinx","kotlinx-serialization-json","1.6.3")
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core.jvm)
 }

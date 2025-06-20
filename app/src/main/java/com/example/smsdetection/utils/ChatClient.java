@@ -1,6 +1,12 @@
 package com.example.smsdetection.utils;// 建议dashscope SDK的版本 >= 2.12.0
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.lang.System;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import com.alibaba.dashscope.aigc.generation.Generation;
 import com.alibaba.dashscope.aigc.generation.GenerationParam;
 import com.alibaba.dashscope.aigc.generation.GenerationResult;
@@ -10,6 +16,18 @@ import com.alibaba.dashscope.exception.ApiException;
 import com.alibaba.dashscope.exception.InputRequiredException;
 import com.alibaba.dashscope.exception.NoApiKeyException;
 import com.alibaba.dashscope.utils.JsonUtils;
+import ai.mlc.mlcllm.MLCEngine;
+import ai.mlc.mlcllm.OpenAIProtocol;
+import kotlin.Unit;
+import kotlinx.coroutines.channels.ReceiveChannel;
+import ai.mlc.mlcllm.Completions;
+import ai.mlc.mlcllm.MLCEngine;
+import ai.mlc.mlcllm.OpenAIProtocol.*;
+import ai.mlc.mlcllm.Completions;
+import kotlin.Unit;
+import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.GlobalScope;
+
 
 public class ChatClient {
     public static final int QWEN0_5b = 0;
